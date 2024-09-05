@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "image": "https://place-hold.it/64x64&text=badge1",
+    "name": "Badge 1",
+    "description": "Description for Badge 1",
+    "language": "English",
+    "triggers": 3
+  },
+  {
+    "id": 2,
+    "image": "https://place-hold.it/64x64&text=badge2",
+    "name": "Badge 2",
+    "description": "Description for Badge 2",
+    "language": "French",
+    "triggers": 3
+  },
+  {
+    "id": 3,
+    "image": "https://place-hold.it/64x64&text=badge3",
+    "name": "Badge 3",
+    "description": "Description for Badge 3",
+    "language": "English",
+    "triggers": 1
+  },
+  {
+    "id": 4,
+    "image": "https://place-hold.it/64x64&text=badge4",
+    "name": "Badge 4",
+    "description": "Description for Badge 4",
+    "language": "French",
+    "triggers": 1
+  },
+  {
+    "id": 5,
+    "image": "https://place-hold.it/64x64&text=badge5",
+    "name": "Badge 5",
+    "description": "Description for Badge 5",
+    "language": "English",
+    "triggers": 2
+  },
+  {
+    "id": 6,
+    "image": "https://place-hold.it/64x64&text=badge6",
+    "name": "Badge 6",
+    "description": "Description for Badge 6",
+    "language": "French",
+    "triggers": 2
+  }
+]
