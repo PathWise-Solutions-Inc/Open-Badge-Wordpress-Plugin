@@ -101,6 +101,15 @@ class OBF_REST_Controller {
 			'callback' => [$this, 'delete_notice'],
 			'permission_callback' => [$this, 'check_permissions'],
 		]);
+
+		// Add new route to get logged-in user's badges
+		register_rest_route('obf-pws/v1', '/user-badges', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_user_badges'],
+			'permission_callback' => function () {
+				return current_user_can('read_badges');
+			}
+		]);
 	}
 
 	/**
@@ -448,5 +457,30 @@ class OBF_REST_Controller {
 		}
 
 		return new WP_REST_Response(['success' => true], 200);
+	}
+
+	/**
+	 * Get logged-in user's badges from the database.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function get_user_badges(WP_REST_Request $request): WP_REST_Response {
+		$user_id = get_current_user_id();
+
+		if (!$user_id) {
+			return new WP_REST_Response(['error' => __('User is not logged in', 'obf')], 401);
+		}
+
+		$user_badges = new OBF_User_Badges();
+		$badges = $user_badges->get_badges_by_user($user_id);
+
+		if (is_wp_error($badges)) {
+			return new WP_REST_Response(['error' => $badges->get_error_message()], 500);
+		}
+
+		error_log('Getting badges');
+
+		return new WP_REST_Response(['badges' => $badges], 200);
 	}
 }

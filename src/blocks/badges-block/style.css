@@ -1,0 +1,14 @@
+.obf-badges-block.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.obf-badges-block .badge-item {
+    text-align: center;
+}
+
+.obf-badges-block img {
+    max-width: 100px;
+    height: auto;
+}

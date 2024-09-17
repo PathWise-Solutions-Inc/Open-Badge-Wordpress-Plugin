@@ -4,12 +4,13 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
-    vue()
+    vue(),
   ],
   build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/main.js'),
+        'badges-block': resolve(__dirname, 'src/blocks/badges-block/block.jsx'),
       },
       output: {
         dir: resolve(__dirname, 'build/'),

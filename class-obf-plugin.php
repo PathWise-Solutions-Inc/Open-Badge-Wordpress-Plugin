@@ -23,13 +23,16 @@ class OBF_Plugin {
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-rest-controller.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-notice-handler.php';
 		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-trigger-executor.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-user-badges.php';
 	}
 
 	private function initialize_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'admin_init', [ $this, 'check_admin_notices' ] );
+		add_action( 'init', [ $this, 'register_obf_block' ] );
 	}
 
 	public function register_menu(): void {
@@ -79,6 +82,100 @@ class OBF_Plugin {
 
 	public function activate(): void {
 		$this->create_tables();
+		$this->obf_add_badge_capabilities();
+	}
+
+	function obf_add_badge_capabilities(): void {
+		// Define roles that should have the 'read_badges' capability
+		$roles = ['administrator', 'editor', 'author', 'subscriber'];
+
+		foreach ($roles as $role_name) {
+			$role = get_role($role_name);
+			if ($role) {
+				$role->add_cap('read_badges');
+			}
+		}
+	}
+
+	public function register_obf_block(): void {
+		register_block_type('obf/badges-block', [
+			'render_callback' => [ $this, 'render_obf_badges_block' ],
+			'attributes' => [
+				'layout' => [
+					'type' => 'string',
+					'default' => 'grid',
+				],
+				'showBadgeName' => [
+					'type' => 'boolean',
+					'default' => true,
+				],
+				'showBadgeImage' => [
+					'type' => 'boolean',
+					'default' => true,
+				],
+				'columns' => [
+					'type' => 'number',
+					'default' => 3,
+				],
+			],
+		]);
+	}
+
+	public function render_obf_badges_block( $attributes ): string {
+		// Get the badges for the logged-in user
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return '<p>' . __( 'You must be logged in to view badges.', 'obf' ) . '</p>';
+		}
+
+		// Fetch badges from the database
+		$badges = $this->get_user_badges_from_database( $user_id );
+
+		if ( empty( $badges ) ) {
+			return '<p>' . __( 'No badges available.', 'obf' ) . '</p>';
+		}
+
+		// Prepare layout and attributes
+		$layout = $attributes['layout'] ?? 'grid';
+		$showBadgeName = $attributes['showBadgeName'] ?? true;
+		$showBadgeImage = $attributes['showBadgeImage'] ?? true;
+		$columns = $attributes['columns'] ?? 3;
+
+		// Render the badges
+		ob_start();
+		?>
+		<div class="obf-badges-block <?php echo esc_attr( $layout ); ?>" style="--columns: <?php echo esc_attr( $columns ); ?>;">
+			<?php foreach ( $badges as $badge ) : ?>
+				<div class="badge-item">
+					<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
+						<img src="<?php echo esc_url( $badge['image'] ); ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>">
+					<?php endif; ?>
+					<?php if ( $showBadgeName ) : ?>
+						<span><?php echo esc_html( $badge['name'] ); ?></span>
+					<?php endif; ?>
+				</div>
+			<?php endforeach; ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	// Helper function to get badges from the database
+	private function get_user_badges_from_database( $user_id ): array {
+		global $wpdb;
+		$table_name_user_badges = $wpdb->prefix . 'obf_pws_user_badges';
+		$table_name_badges = $wpdb->prefix . 'obf_pws_badges';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT b.name, b.image
+            FROM {$table_name_user_badges} ub
+            LEFT JOIN {$table_name_badges} b ON ub.badge_id = b.id
+            WHERE ub.user_id = %d",
+				$user_id
+			),
+			ARRAY_A
+		);
 	}
 
 	private function create_tables(): void {
