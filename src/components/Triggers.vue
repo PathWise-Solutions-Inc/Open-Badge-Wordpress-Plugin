@@ -197,19 +197,26 @@ export default {
           object_title: postTitle,  // Save post title
         });
 
-        // Replace the local trigger with the saved trigger data (including the ID and object_title)
-        const existingTriggerIndex = this.triggers.findIndex(t => t.tempId === trigger.tempId || t.id === trigger.id);
-        if (existingTriggerIndex !== -1) {
-          this.$store.commit('updateTrigger', savedTrigger.trigger);
-        } else {
-          this.$store.commit('deleteTrigger', trigger.tempId); // Remove the temporary trigger
-          this.$store.commit('addTrigger', savedTrigger.trigger); // Add the trigger with the correct ID
+        // Remove the temporary trigger if it exists (Important)
+        if (trigger.tempId) {
+          const tempTriggerIndex = this.triggers.findIndex(t => t.tempId === trigger.tempId);
+          if (tempTriggerIndex !== -1) {
+            this.$store.commit('deleteTrigger', trigger.tempId);  // Remove temporary trigger
+          }
         }
 
-        // Ensure the local trigger's object_title is updated
+        // Check if the saved trigger already exists in the state (to avoid duplicates - Important)
+        const existingTriggerIndex = this.triggers.findIndex(t => t.id === savedTrigger.trigger.id);
+        if (existingTriggerIndex === -1) {
+          // Add the saved trigger to the store if it's not already there
+          this.$store.commit('addTrigger', savedTrigger.trigger);
+        }
+
+        // Update the local trigger's data
         trigger.object_title = savedTrigger.trigger.object_title;
         trigger.id = savedTrigger.trigger.id;
         trigger.isEditing = false;
+
       } catch (error) {
         console.error('Error saving trigger:', error);
       }

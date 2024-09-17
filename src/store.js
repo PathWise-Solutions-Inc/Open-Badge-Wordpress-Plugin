@@ -19,11 +19,7 @@ export default createStore({
             }));
         },
         addTrigger(state, trigger) {
-            // Check if a trigger with the same ID or tempId already exists
-            const existingTrigger = state.triggers.find(t => t.id === trigger.id || t.tempId === trigger.tempId);
-            if (!existingTrigger) {
-                state.triggers.unshift(trigger); // Add the new trigger to the beginning of the list
-            }
+            state.triggers.unshift(trigger);
         },
         updateTrigger(state, updatedTrigger) {
             const index = state.triggers.findIndex(trigger => trigger.id === updatedTrigger.id);
