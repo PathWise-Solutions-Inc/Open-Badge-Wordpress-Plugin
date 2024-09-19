@@ -1,4 +1,53 @@
+/* Common block styles */
 .obf-badges-block {
     padding: 20px;
-    border: 1px dashed #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+}
+
+/* Grid layout */
+.obf-badges-block.grid {
+    display: grid;
+    grid-template-columns: repeat(var(--columns, 3), 1fr);
+    gap: 20px;
+    width: 100%;
+}
+
+/* Table layout */
+.obf-badges-block.table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+/* Ensures each cell takes equal space and table spans full width */
+.obf-badges-block.table td {
+    width: calc(100% / var(--columns, 3));
+    padding: 10px;
+    text-align: center;
+}
+
+/* List layout */
+.obf-badges-block.list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+/* Badge item styles */
+.obf-badges-block .badge-item {
+    text-align: center;
+    max-width: 450px;
+    width: 100%;
+}
+
+/* Badge image styles */
+.obf-badges-block img {
+    width: 100%;
+    max-width: 450px;
+    margin: 0 auto;
+    display: block;
 }

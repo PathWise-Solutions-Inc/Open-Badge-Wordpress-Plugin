@@ -30,6 +30,7 @@ class OBF_Trigger_Executor {
 	public function handle_lesson_completed($lesson_data): void {
 		$user_id = $lesson_data['user']->ID ?? null;
 		$lesson_id = $lesson_data['lesson']->ID ?? null;
+		error_log('Trying to Complete Lesson: ' . $lesson_id . ' for ' . $user_id);
 
 		if ($user_id && $lesson_id) {
 			$this->execute_trigger('Lesson Complete', $lesson_id, $user_id);

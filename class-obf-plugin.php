@@ -9,6 +9,7 @@ class OBF_Plugin {
 	public function __construct() {
 		$this->load_dependencies();
 		$this->initialize_hooks();
+        $this->define_shortcodes();
 
 		// Initialize the trigger executor
 		new OBF_Trigger_Executor();
@@ -33,6 +34,10 @@ class OBF_Plugin {
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'admin_init', [ $this, 'check_admin_notices' ] );
 		add_action( 'init', [ $this, 'register_obf_block' ] );
+	}
+
+	private function define_shortcodes(): void {
+		add_shortcode( 'user_badges', [ $this, 'user_badges_shortcode' ] );
 	}
 
 	public function register_menu(): void {
@@ -98,27 +103,29 @@ class OBF_Plugin {
 	}
 
 	public function register_obf_block(): void {
-		register_block_type('obf/badges-block', [
-			'render_callback' => [ $this, 'render_obf_badges_block' ],
-			'attributes' => [
-				'layout' => [
-					'type' => 'string',
-					'default' => 'grid',
+		if ( !WP_Block_Type_Registry::get_instance()->is_registered( 'obf/badges-block' ) ) {
+			register_block_type( 'obf/badges-block', [
+				'render_callback' => [ $this, 'render_obf_badges_block' ],
+				'attributes'      => [
+					'layout'         => [
+						'type'    => 'string',
+						'default' => 'grid',
+					],
+					'showBadgeName'  => [
+						'type'    => 'boolean',
+						'default' => true,
+					],
+					'showBadgeImage' => [
+						'type'    => 'boolean',
+						'default' => true,
+					],
+					'columns'        => [
+						'type'    => 'number',
+						'default' => 3,
+					],
 				],
-				'showBadgeName' => [
-					'type' => 'boolean',
-					'default' => true,
-				],
-				'showBadgeImage' => [
-					'type' => 'boolean',
-					'default' => true,
-				],
-				'columns' => [
-					'type' => 'number',
-					'default' => 3,
-				],
-			],
-		]);
+			] );
+		}
 	}
 
 	public function render_obf_badges_block( $attributes ): string {
@@ -140,24 +147,115 @@ class OBF_Plugin {
 		$showBadgeName = $attributes['showBadgeName'] ?? true;
 		$showBadgeImage = $attributes['showBadgeImage'] ?? true;
 		$columns = $attributes['columns'] ?? 3;
+		$imageWidth = $attributes['imageWidth'] ?? '100%';
+		$imageMaxWidth = $attributes['imageMaxWidth'] ?? '450px';
 
-		// Render the badges
 		ob_start();
-		?>
-		<div class="obf-badges-block <?php echo esc_attr( $layout ); ?>" style="--columns: <?php echo esc_attr( $columns ); ?>;">
-			<?php foreach ( $badges as $badge ) : ?>
-				<div class="badge-item">
-					<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
-						<img src="<?php echo esc_url( $badge['image'] ); ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>">
+
+		// Render based on the selected layout
+		if ( $layout === 'grid' ) {
+			?>
+            <div class="obf-badges-block grid" style="--columns: <?php echo esc_attr( $columns ); ?>;">
+				<?php foreach ( $badges as $badge ) : ?>
+                    <div class="badge-item">
+						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
+                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                                 loading="lazy"
+                                 style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
+						<?php endif; ?>
+						<?php if ( $showBadgeName ) : ?>
+                            <span><?php echo esc_html( $badge['name'] ); ?></span>
+						<?php endif; ?>
+                    </div>
+				<?php endforeach; ?>
+            </div>
+			<?php
+		} elseif ( $layout === 'table' ) {
+			?>
+            <table class="obf-badges-block table" style="--columns: <?php echo esc_attr( $columns ); ?>;">
+                <tbody>
+				<?php
+				$count = 0;
+				foreach ( $badges as $badge ) :
+					if ( $count % $columns === 0 ) : // Start a new row every $columns badges
+						?>
+                        <tr>
 					<?php endif; ?>
-					<?php if ( $showBadgeName ) : ?>
-						<span><?php echo esc_html( $badge['name'] ); ?></span>
+                    <td class="badge-item">
+						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
+                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                                 loading="lazy"
+                                 style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
+						<?php endif; ?>
+						<?php if ( $showBadgeName ) : ?>
+                            <span><?php echo esc_html( $badge['name'] ); ?></span>
+						<?php endif; ?>
+                    </td>
+					<?php
+					$count++;
+					if ( $count % $columns === 0 ) : // Close the row after $columns badges
+						?>
+                        </tr>
 					<?php endif; ?>
-				</div>
-			<?php endforeach; ?>
-		</div>
-		<?php
+				<?php endforeach; ?>
+				<?php
+				// Close the last row if it's not complete
+				if ( $count % $columns !== 0 ) :
+					?>
+                    </tr>
+				<?php endif; ?>
+                </tbody>
+            </table>
+			<?php
+		} elseif ( $layout === 'list' ) {
+			?>
+            <ul class="obf-badges-block list">
+				<?php foreach ( $badges as $badge ) : ?>
+                    <li class="badge-item">
+						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
+                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                                 loading="lazy"
+                                 style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
+						<?php endif; ?>
+						<?php if ( $showBadgeName ) : ?>
+                            <span><?php echo esc_html( $badge['name'] ); ?></span>
+						<?php endif; ?>
+                    </li>
+				<?php endforeach; ?>
+            </ul>
+			<?php
+		}
+
 		return ob_get_clean();
+	}
+
+	// Function to handle the shortcode
+	public function user_badges_shortcode( $atts ) {
+		// Define default attributes that match the Gutenberg editor
+		$defaults = [
+			'layout'          => 'grid',
+			'columns'         => 3,
+			'show_image'      => 1,
+			'show_name'       => 1,
+			'image_width'     => '100%',
+			'image_max_width' => '450px',
+		];
+
+		// Parse the provided attributes against the defaults
+		$attributes = shortcode_atts( $defaults, $atts );
+
+		// Convert attributes to match the format expected by render_obf_badges_block
+		$attributes = [
+			'layout'          => $attributes['layout'],
+			'columns'         => (int) $attributes['columns'],
+			'showBadgeImage'  => (bool) $attributes['show_image'],
+			'showBadgeName'   => (bool) $attributes['show_name'],
+			'imageWidth'      => $attributes['image_width'],
+			'imageMaxWidth'   => $attributes['image_max_width'],
+		];
+
+		// Call the existing render function with the mapped attributes
+		return $this->render_obf_badges_block( $attributes );
 	}
 
 	// Helper function to get badges from the database

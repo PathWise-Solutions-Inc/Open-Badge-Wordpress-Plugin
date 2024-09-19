@@ -11,6 +11,9 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'src/main.js'),
         'badges-block': resolve(__dirname, 'src/blocks/badges-block/block.jsx'),
+        'badges-block-style': resolve(__dirname, 'src/blocks/badges-block/style.css'),
+        'badges-block-editor': resolve(__dirname, 'src/blocks/badges-block/editor.css'),
+        'global-style': resolve(__dirname, 'src/style.css'), // Include the global style file
       },
       output: {
         dir: resolve(__dirname, 'build/'),

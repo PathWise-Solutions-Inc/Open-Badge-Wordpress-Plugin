@@ -2,7 +2,49 @@
 
 ## Release Notes
 
-### v0.2.1 - User Badge Block and Frontend Enhancements (2024-09-19)
+### v0.3.0 - Shortcode Integration and Enhanced Badge Display Options (2024-09-19)
+
+**What's New:**
+
+- **Shortcode Integration:**
+    - Introduced the `[user_badges]` shortcode, allowing users to display their earned badges anywhere on their site without using the Gutenberg block.
+    - Shortcode attributes match the Gutenberg block settings for consistent behavior:
+        - `layout`: Choose between 'grid', 'table', or 'list' layouts (`layout="grid"` by default).
+        - `columns`: Adjust the number of columns in the grid or table layout (`columns="3"` by default).
+        - `show_image`: Toggle the display of badge images (`show_image="1"` by default).
+        - `show_name`: Toggle the display of badge names (`show_name="1"` by default).
+        - `image_width` and `image_max_width`: Control the badge image width and maximum width (`image_width="100%"` and `image_max_width="450px"` by default).
+    - The shortcode seamlessly reuses the existing rendering logic of the Gutenberg block for a unified and efficient approach.
+
+- **Enhanced Table and List Layouts:**
+    - Improved the table layout to dynamically handle the specified number of columns, ensuring badges are displayed evenly and aesthetically.
+    - The list layout now groups each badge and its name as a cohesive element, enhancing readability and organization.
+    - Adjusted CSS to ensure that table layouts span the full width of the available space, providing a more polished display.
+
+**Enhancements:**
+
+- **Consistent Badge Display Across Editor and Shortcode:**
+    - Unified rendering logic for badges across both Gutenberg blocks and shortcodes, reducing code duplication and maintenance.
+    - Ensured that any customization made in the block editor is faithfully replicated when using the shortcode.
+
+- **Styling Improvements:**
+    - Updated CSS to ensure full-width display of table layouts and consistent centering of badge images and names across all layouts.
+    - Enhanced flex and grid styles to ensure badges are visually balanced, regardless of the selected layout.
+
+- **Performance Optimizations:**
+    - Further optimized server-side rendering and caching for badge data to enhance performance, especially for larger badge sets.
+
+**Bug Fixes:**
+
+- **Shortcode Attribute Handling:**
+    - Fixed issues with shortcode attribute handling to ensure that user-provided values are correctly processed and applied.
+
+- **Rendering Consistency:**
+    - Addressed inconsistencies between block and shortcode rendering, ensuring all badge display options are honored equally.
+
+---
+
+### v0.2.1 - User Badge Block and Frontend Enhancements (2024-09-18)
 
 **What's New:**
 

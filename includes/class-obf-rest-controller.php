@@ -338,8 +338,6 @@ class OBF_REST_Controller {
 		$log = new OBF_Log();
 		$logs = $log->get_logs($request);
 
-		error_log(print_r($logs, true));
-
 		// Ensure logs is an array
 		if (is_wp_error($logs)) {
 			return new WP_REST_Response(['error' => $logs->get_error_message()], 500);
@@ -478,8 +476,6 @@ class OBF_REST_Controller {
 		if (is_wp_error($badges)) {
 			return new WP_REST_Response(['error' => $badges->get_error_message()], 500);
 		}
-
-		error_log('Getting badges');
 
 		return new WP_REST_Response(['badges' => $badges], 200);
 	}

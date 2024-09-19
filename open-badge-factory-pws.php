@@ -3,7 +3,7 @@
  * Plugin Name: Open Badge Factory by Pathwise Solutions
  * Plugin URI: https://pathwisesolutions.com/open-badge-factory
  * Description: Connect your LearnDash courses to Open Badge Factory. Sync your badges and setup different triggers.
- * Version: 0.2.1
+ * Version: 0.3.0
  * Author: Pathwise Solutions Inc
  * Author URI: https://pathwisesolutions.com
  * License: GPL-2.0+

@@ -64,7 +64,6 @@ class OBF_API_Client {
 		}
 
 		// Log full response if access token was not found
-		error_log('OBF API Token Response Error: ' . print_r($data, true));
 		return new WP_Error('obf_api_error', __('Failed to retrieve access token', 'obf'));
 	}
 
@@ -76,9 +75,9 @@ class OBF_API_Client {
 	 * @param array $body Request body (optional).
 	 * @param array $query_params Query parameters (optional).
 	 *
-	 * @return WP_Error|string The response body or WP_Error on failure.
+	 * @return WP_Error|array The full response or WP_Error on failure.
 	 */
-	private function make_request(string $method, string $endpoint, array $body = [], array $query_params = []): WP_Error|string {
+	private function make_request(string $method, string $endpoint, array $body = [], array $query_params = []): WP_Error|array {
 		// Ensure we have a valid access token
 		if (empty($this->access_token)) {
 			$this->get_access_token();
@@ -124,11 +123,11 @@ class OBF_API_Client {
 		// Check if response code indicates failure
 		if ($response_code < 200 || $response_code >= 300) {
 			error_log('OBF API Request Error - HTTP Status: ' . $response_code . ' Body: ' . $response_body);
-			return new WP_Error('obf_api_error', __('Failed to communicate with OBF API', 'obf'), ['status_code' => $response_code]);
+			return new WP_Error('obf_api_error', __('Failed to communicate with OBF API', 'obf'), ['status_code' => $response_code, 'body' => $response_body]);
 		}
 
-		// Return the response body as a string
-		return $response_body;
+		// Return the full response to allow further checks
+		return $response;
 	}
 
 	/**
@@ -149,6 +148,7 @@ class OBF_API_Client {
 		$badge = $wpdb->get_row($wpdb->prepare("SELECT obf_id FROM $table_name WHERE id = %d", $badge_id));
 
 		if (!$badge || empty($badge->obf_id)) {
+			error_log('The OBF ID was not found for the given badge ID. Badge obf_id: ' . $badge_id);
 			return new WP_Error('obf_id_not_found', __('The OBF ID was not found for the given badge ID.', 'obf'));
 		}
 
@@ -169,11 +169,11 @@ class OBF_API_Client {
 		// Check for expected success code (e.g., 201 Created)
 		$response_code = wp_remote_retrieve_response_code($response);
 		if ($response_code === 201) {
-			return $response;
+			return wp_remote_retrieve_body($response);
 		}
 
 		// If not a success response, return an error with the response body
-		return new WP_Error('obf_api_error', __('Failed to issue badge', 'obf'), ['response' => $response]);
+		return new WP_Error('obf_api_error', __('Failed to issue badge', 'obf'), ['response' => wp_remote_retrieve_body($response)]);
 	}
 
 
@@ -183,13 +183,16 @@ class OBF_API_Client {
 	 * @return WP_Error|string 'Connected' on success or WP_Error on failure.
 	 */
 	public function ping(): WP_Error|string {
-		$response_body = $this->make_request('GET', 'ping/' . $this->client_id);
+		$response = $this->make_request('GET', 'ping/' . $this->client_id);
 
 		// Check if the request resulted in an error
-		if (is_wp_error($response_body)) {
-			error_log('OBF API Ping Error: ' . $response_body->get_error_message());
-			return $response_body;
+		if (is_wp_error($response)) {
+			error_log('OBF API Ping Error: ' . $response->get_error_message());
+			return $response;
 		}
+
+		// Extract the response body
+		$response_body = wp_remote_retrieve_body($response);
 
 		// Check if the response body matches the client_id
 		if (trim($response_body) === $this->client_id) {
@@ -209,11 +212,20 @@ class OBF_API_Client {
 	 * @return WP_Error|array List of badges or WP_Error on failure.
 	 */
 	public function get_badges(array $params = []): WP_Error|array {
-		$response_body = $this->make_request('GET', 'badge/' . $this->client_id, [], $params);
+		$response = $this->make_request('GET', 'badge/' . $this->client_id, [], $params);
+
+		// Check if the request resulted in an error
+		if (is_wp_error($response)) {
+			return $response;
+		}
+
+		// Extract the response body
+		$response_body = wp_remote_retrieve_body($response);
 
 		// Since the response is line-delimited JSON, process it accordingly
 		return $this->process_line_delimited_json($response_body);
 	}
+
 
 	/**
 	 * Parse a line-delimited JSON response.
@@ -223,9 +235,6 @@ class OBF_API_Client {
 	 * @return WP_Error|array Parsed data or WP_Error on failure.
 	 */
 	private function process_line_delimited_json(string $response_body): WP_Error|array {
-		error_log( 'process_line_delimited_json' );
-		error_log( $response_body );
-
 		$lines = explode("\n", trim($response_body));
 		$data = [];
 
@@ -250,8 +259,26 @@ class OBF_API_Client {
 	 * @return WP_Error|array Badge data or WP_Error on failure.
 	 */
 	public function get_badge_by_id(string $badge_id): WP_Error|array {
-		return $this->make_request('GET', 'badge/' . $this->client_id . '/' . $badge_id);
+		$response = $this->make_request('GET', 'badge/' . $this->client_id . '/' . $badge_id);
+
+		// Check if the request resulted in an error
+		if (is_wp_error($response)) {
+			return $response;
+		}
+
+		// Extract the response body and decode it into an array
+		$response_body = wp_remote_retrieve_body($response);
+		$badge_data = json_decode($response_body, true);
+
+		// Handle JSON decoding errors
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			error_log('OBF API Error - JSON Decoding: ' . json_last_error_msg());
+			return new WP_Error('obf_api_error', __('Failed to decode badge data', 'obf'));
+		}
+
+		return $badge_data;
 	}
+
 
 	/**
 	 * Check the connection status with the OBF API.

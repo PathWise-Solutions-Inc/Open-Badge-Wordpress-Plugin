@@ -1,7 +1,7 @@
 <!-- src/App.vue -->
 
 <template>
-  <div id="obf-pws">
+  <div id="obf-pws-container">
     <app-header></app-header>
     <main>
       <router-view></router-view>
