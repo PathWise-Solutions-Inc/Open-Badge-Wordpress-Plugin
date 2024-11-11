@@ -1,5 +1,26 @@
 <template>
   <div>
+    <div class="filter-buttons">
+      <button
+          :class="{ active: selectedFilter === 'all' }"
+          @click="setFilter('all')"
+      >
+        All
+      </button>
+      <button
+          :class="{ active: selectedFilter === 'admin' }"
+          @click="setFilter('admin')"
+      >
+        Admin
+      </button>
+      <button
+          :class="{ active: selectedFilter === 'users' }"
+          @click="setFilter('users')"
+      >
+        Users
+      </button>
+    </div>
+
     <input v-model="searchQuery" placeholder="Search..." class="search-input" />
 
     <div v-if="loading" class="spinner-container">
@@ -49,6 +70,7 @@
   </div>
 </template>
 
+
 <script>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
@@ -70,17 +92,24 @@ export default {
       sortOrder: 'desc',
       currentPage: 1,
       perPage: 10,
-      loading: true, // Added loading state
+      loading: true,
+      selectedFilter: 'all',
     };
   },
   computed: {
     filteredLogs() {
-      // Ensure logs is an array before sorting and filtering
       if (!Array.isArray(this.logs)) {
         return [];
       }
 
-      let filtered = [...this.logs]; // Make a copy of the array
+      let filtered = [...this.logs];
+
+      // Filter by selectedFilter
+      if (this.selectedFilter === 'admin') {
+        filtered = filtered.filter(log => log.post_id === '');
+      } else if (this.selectedFilter === 'users') {
+        filtered = filtered.filter(log => log.post_id !== '');
+      }
 
       // Global search filter
       if (this.searchQuery) {
@@ -105,7 +134,24 @@ export default {
       return filtered.slice(start, end);
     },
     totalPages() {
-      return Math.ceil(this.logs.length / this.perPage);
+      // Calculate total pages based on filtered logs (not paginated)
+      let filtered = [...this.logs];
+
+      if (this.selectedFilter === 'admin') {
+        filtered = filtered.filter(log => log.post_id === '');
+      } else if (this.selectedFilter === 'users') {
+        filtered = filtered.filter(log => log.post_id !== '');
+      }
+
+      if (this.searchQuery) {
+        filtered = filtered.filter(log =>
+            Object.values(log).some(value =>
+                String(value).toLowerCase().includes(this.searchQuery.toLowerCase())
+            )
+        );
+      }
+
+      return Math.ceil(filtered.length / this.perPage);
     }
   },
   methods: {
@@ -125,6 +171,10 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    setFilter(filter) {
+      this.selectedFilter = filter;
+      this.currentPage = 1;
     },
     sortBy(column) {
       if (this.sortColumn === column) {
@@ -154,6 +204,14 @@ export default {
       return userId ? `/wp-admin/user-edit.php?user_id=${userId}` : '#';
     }
   },
+  watch: {
+    selectedFilter() {
+      this.currentPage = 1; // Reset to the first page when filter changes
+    },
+    searchQuery() {
+      this.currentPage = 1; // Reset to the first page when search query changes
+    }
+  },
   async mounted() {
     await this.loadLogs();
   }
@@ -174,12 +232,13 @@ export default {
 }
 
 .log-table th {
-  background-color: #f4f4f4;
+  background-color: var(--primary-color);
+  color: #fff;
   cursor: pointer;
 }
 
 .log-table th:hover {
-  background-color: #e2e2e2;
+  background-color: #00a0d2;
 }
 
 .search-input {
@@ -218,5 +277,30 @@ export default {
 .loading-spinner {
   font-size: 3rem; /* Larger spinner */
   color: var(--primary-color);
+}
+
+.filter-buttons {
+  margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.filter-buttons button {
+  padding: 8px 12px;
+  border: 1px solid var(--nav-text-color);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-buttons button.active {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.filter-buttons button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
 }
 </style>
