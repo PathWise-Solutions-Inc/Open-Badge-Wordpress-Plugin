@@ -102,13 +102,24 @@ class OBF_REST_Controller {
 			'permission_callback' => [$this, 'check_permissions'],
 		]);
 
-		// Add new route to get logged-in user's badges
 		register_rest_route('obf-pws/v1', '/user-badges', [
 			'methods' => 'GET',
 			'callback' => [$this, 'get_user_badges'],
 			'permission_callback' => function () {
 				return current_user_can('read_badges');
 			}
+		]);
+
+		register_rest_route('obf-pws/v1', '/export-logs', [
+			'methods' => 'GET',
+			'callback' => [$this, 'export_logs_to_csv'],
+			'permission_callback' => [$this, 'check_permissions'],
+		]);
+
+		register_rest_route('obf-pws/v1', '/clear-logs', [
+			'methods' => 'DELETE',
+			'callback' => [$this, 'clear_logs'],
+			'permission_callback' => [$this, 'check_permissions'],
 		]);
 	}
 
@@ -230,13 +241,13 @@ class OBF_REST_Controller {
 		$triggers = $trigger_model->get_triggers();
 
 		if (is_wp_error($triggers)) {
-			OBF_Log::log_error('Error fetching triggers: ' . $triggers->get_error_message());
-			return new WP_REST_Response(['error' => $triggers->get_error_message()], 500);
+			$error_message = $triggers->get_error_message();
+			OBF_Log::log_error('Error fetching triggers: ' . $error_message);
+			return new WP_REST_Response(['error' => $error_message], 500);
 		}
 
 		return new WP_REST_Response(['triggers' => $triggers], 200);
 	}
-
 	/**
 	 * Get a single trigger by ID.
 	 *
@@ -479,4 +490,52 @@ class OBF_REST_Controller {
 
 		return new WP_REST_Response(['badges' => $badges], 200);
 	}
+
+	/**
+	 * Export logs to CSV.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return void
+	 */
+	public function export_logs_to_csv(WP_REST_Request $request) {
+		error_log('Export logs route hit'); // Debugging line
+
+		$log = new OBF_Log();
+		$csv_content = $log->generate_csv();
+
+		if (!$csv_content) {
+			header('Content-Type: application/json; charset=utf-8');
+			echo json_encode(['error' => 'No logs available to export.']);
+			exit;
+		}
+
+		// Generate a filename with the current date
+		$filename = 'obf-pws-logs-' . date('Y-m-d') . '.csv';
+
+		// Set headers for CSV download
+		header('Content-Type: text/csv; charset=utf-8');
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		echo $csv_content;
+
+		// Prevent WordPress from appending additional content
+		exit;
+	}
+
+	/**
+	 * Clear all logs.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function clear_logs(WP_REST_Request $request) {
+		$log = new OBF_Log();
+		$cleared = $log->clear_all_logs();
+
+		if (!$cleared) {
+			return new WP_REST_Response(['success' => false, 'message' => 'Failed to clear logs.'], 500);
+		}
+
+		return new WP_REST_Response(['success' => true, 'message' => 'Logs cleared successfully.'], 200);
+	}
+
 }

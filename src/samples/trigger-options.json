@@ -15,7 +15,7 @@
     "Topic Complete": {
       "label": "Topic",
       "objects": [
-        "sfwd-topics"
+        "sfwd-topic"
       ]
     },
     "Quiz Complete": {

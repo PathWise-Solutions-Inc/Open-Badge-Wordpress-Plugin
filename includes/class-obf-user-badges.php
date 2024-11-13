@@ -21,7 +21,7 @@ class OBF_User_Badges {
 	 * @param int $user_id
 	 * @return array|WP_Error
 	 */
-	public function get_badges_by_user(int $user_id): array|WP_Error {
+	public function get_badges_by_user(int $user_id) {
 		global $wpdb;
 
 		$badges = $wpdb->get_results($wpdb->prepare("

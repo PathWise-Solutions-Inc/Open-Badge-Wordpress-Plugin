@@ -18,7 +18,7 @@ class OBF_Trigger {
 	 * @param int $trigger_id
 	 * @return WP_Error|object
 	 */
-	public function get_trigger(int $trigger_id): WP_Error|stdClass {
+	public function get_trigger(int $trigger_id) {
 		global $wpdb;
 
 		// Fetch the trigger with the associated post title
@@ -48,7 +48,7 @@ class OBF_Trigger {
 	 * @param string $object
 	 * @return WP_Error|stdClass
 	 */
-	public function update_trigger(int $id, string $badge_id, string $extension, string $trigger_type, string $object): WP_Error|stdClass {
+	public function update_trigger(int $id, string $badge_id, string $extension, string $trigger_type, string $object) {
 		global $wpdb;
 
 		$updated = $wpdb->update(
@@ -80,7 +80,7 @@ class OBF_Trigger {
 	 * @param string $object
 	 * @return WP_Error|stdClass
 	 */
-	public function create_trigger(string $badge_id, string $extension, string $trigger_type, string $object): WP_Error|stdClass {
+	public function create_trigger(string $badge_id, string $extension, string $trigger_type, string $object) {
 		global $wpdb;
 
 		$inserted = $wpdb->insert(
@@ -110,7 +110,7 @@ class OBF_Trigger {
 	 * @param int $trigger_id
 	 * @return bool|WP_Error
 	 */
-	public function delete_trigger(int $trigger_id): bool|WP_Error {
+	public function delete_trigger(int $trigger_id) {
 		global $wpdb;
 
 		$deleted = $wpdb->delete($this->table_name, ['id' => $trigger_id]);
@@ -127,20 +127,26 @@ class OBF_Trigger {
 	/**
 	 * Get all triggers with post titles.
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
-	public function get_triggers(): array {
+	public function get_triggers() {
 		global $wpdb;
 
-		// Fetch all triggers along with the post titles for the associated objects
-		$triggers = $wpdb->get_results("
-	        SELECT t.*, p.post_title as object_title
-	        FROM {$this->table_name} t
-	        LEFT JOIN {$wpdb->posts} p ON t.object = p.ID
-	        ORDER BY t.updated_at DESC
-	    ");
+		try {
+			// Fetch all triggers along with the post titles for the associated objects
+			$triggers = $wpdb->get_results("
+            SELECT t.*, p.post_title as object_title
+            FROM {$this->table_name} t
+            LEFT JOIN {$wpdb->posts} p ON t.object = p.ID
+            ORDER BY t.updated_at DESC
+        ");
 
-		// Return the triggers or an empty array if none exist
-		return $triggers ?: [];
+			// Return the triggers or an empty array if none exist
+			return $triggers ?: [];
+		} catch (Exception $e) {
+			// Log the error
+			OBF_Log::log_error('Error fetching triggers: ' . $e->getMessage());
+			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'obf'));
+		}
 	}
 }

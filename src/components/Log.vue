@@ -19,7 +19,23 @@
       >
         Users
       </button>
+
+      <button
+          class="export-button"
+          @click="exportToCSV"
+      >
+        Export to CSV
+      </button>
+
+      <!-- New Clear Log Button -->
+      <button
+          class="clear-log-button"
+          @click="clearLog"
+      >
+        Clear Log
+      </button>
     </div>
+
 
     <input v-model="searchQuery" placeholder="Search..." class="search-input" />
 
@@ -156,6 +172,69 @@ export default {
   },
   methods: {
     ...mapActions(['fetchLogs']),
+    async exportToCSV() {
+      this.loading = true;
+      try {
+        // Make a request to the backend route
+        const response = await fetch('/wp-json/obf-pws/v1/export-logs', {
+          method: 'GET',
+          headers: {
+            'X-WP-Nonce': obfOptions.nonce,
+            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859'
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to export CSV: ${response.statusText}`);
+        }
+
+        // Convert response to a Blob
+        const blob = await response.blob();
+
+        // Create a link element to trigger the download
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'logs-export.csv');
+        document.body.appendChild(link);
+        link.click();
+
+        // Clean up the link element
+        link.parentNode.removeChild(link);
+      } catch (error) {
+        console.error('Error exporting CSV:', error);
+        alert('Failed to export logs. Please try again.');
+      } finally {
+        this.loading = false;
+      }
+    },
+    async clearLog() {
+      const confirmed = confirm("Are you sure you want to clear all logs?");
+      if (!confirmed) return;
+
+      this.loading = true;
+      try {
+        const response = await fetch('/wp-json/obf-pws/v1/clear-logs', {
+          method: 'DELETE',
+          headers: {
+            'X-WP-Nonce': obfOptions.nonce,
+            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859'
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to clear logs: ${response.statusText}`);
+        }
+
+        alert("Logs cleared successfully.");
+        await this.loadLogs(); // Reload logs after clearing
+      } catch (error) {
+        console.error('Error clearing logs:', error);
+        alert('Failed to clear logs. Please try again.');
+      } finally {
+        this.loading = false;
+      }
+    },
     async loadLogs() {
       this.loading = true;
       try {
@@ -206,10 +285,10 @@ export default {
   },
   watch: {
     selectedFilter() {
-      this.currentPage = 1; // Reset to the first page when filter changes
+      this.currentPage = 1;
     },
     searchQuery() {
-      this.currentPage = 1; // Reset to the first page when search query changes
+      this.currentPage = 1;
     }
   },
   async mounted() {
@@ -271,7 +350,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 300px; /* Add more space above and below the spinner */
+  height: 300px;
 }
 
 .loading-spinner {
@@ -290,6 +369,7 @@ export default {
   border: 1px solid var(--nav-text-color);
   background-color: var(--background-color);
   color: var(--primary-color);
+  font-weight: bold;
   border-radius: 4px;
   cursor: pointer;
 }
@@ -301,6 +381,39 @@ export default {
 
 .filter-buttons button:hover {
   background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* Add styles for Export button */
+.filter-buttons button.export-button {
+  margin-left: auto; /* Align it to the right */
+  padding: 8px 12px;
+  border: 1px solid var(--primary-color);
+  background-color: var(--background-color);
+  color: var(--primary-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-buttons button.export-button:hover {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+.filter-buttons button.clear-log-button {
+  margin-left: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--error-text-color);
+  background-color: var(--background-color);
+  color: var(--error-text-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-buttons button.clear-log-button:hover {
+  background-color: var(--error-text-color);
   color: #fff;
 }
 </style>

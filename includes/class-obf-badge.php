@@ -1,7 +1,7 @@
 <?php
 // includes/class-obf-badge.php
 class OBF_Badge {
-	private $table_name;
+	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
@@ -25,7 +25,7 @@ class OBF_Badge {
 	/**
 	 * @throws Exception
 	 */
-	public function sync_from_api($external_badges): array|object|null {
+	public function sync_from_api($external_badges) {
 		global $wpdb;
 
 		// Step 1: Retrieve all existing badges in the database

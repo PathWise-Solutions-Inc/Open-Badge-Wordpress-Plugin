@@ -22,7 +22,7 @@ class OBF_API_Client {
 		$this->get_access_token();
 	}
 
-	public function get_access_token(): WP_Error|string {
+	public function get_access_token() {
 		$stored_token = get_option('obf_access_token');
 		$token_expires_in = get_option('obf_token_expires_in');
 		$current_time = time();
@@ -77,7 +77,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|array The full response or WP_Error on failure.
 	 */
-	private function make_request(string $method, string $endpoint, array $body = [], array $query_params = []): WP_Error|array {
+	private function make_request(string $method, string $endpoint, array $body = [], array $query_params = []) {
 		// Ensure we have a valid access token
 		if (empty($this->access_token)) {
 			$this->get_access_token();
@@ -140,7 +140,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|string The response body or WP_Error on failure.
 	 */
-	public function issue_badge(string $badge_id, array $recipients, int $expires = null, array $additional_params = []): WP_Error|string {
+	public function issue_badge(string $badge_id, array $recipients, int $expires = null, array $additional_params = []) {
 		global $wpdb;
 
 		// Fetch the OBF ID for the badge
@@ -182,7 +182,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|string 'Connected' on success or WP_Error on failure.
 	 */
-	public function ping(): WP_Error|string {
+	public function ping() {
 		$response = $this->make_request('GET', 'ping/' . $this->client_id);
 
 		// Check if the request resulted in an error
@@ -211,7 +211,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|array List of badges or WP_Error on failure.
 	 */
-	public function get_badges(array $params = []): WP_Error|array {
+	public function get_badges(array $params = []) {
 		$response = $this->make_request('GET', 'badge/' . $this->client_id, [], $params);
 
 		// Check if the request resulted in an error
@@ -234,7 +234,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|array Parsed data or WP_Error on failure.
 	 */
-	private function process_line_delimited_json(string $response_body): WP_Error|array {
+	private function process_line_delimited_json(string $response_body) {
 		$lines = explode("\n", trim($response_body));
 		$data = [];
 
@@ -258,7 +258,7 @@ class OBF_API_Client {
 	 *
 	 * @return WP_Error|array Badge data or WP_Error on failure.
 	 */
-	public function get_badge_by_id(string $badge_id): WP_Error|array {
+	public function get_badge_by_id(string $badge_id) {
 		$response = $this->make_request('GET', 'badge/' . $this->client_id . '/' . $badge_id);
 
 		// Check if the request resulted in an error
