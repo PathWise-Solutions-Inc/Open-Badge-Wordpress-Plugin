@@ -8,8 +8,7 @@
  * Author URI: https://pathwisesolutions.com
  * License: GPL-2.0+
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain: obf-pws
- * Domain Path: /languages
+ * Text Domain: open-badge-factory-by-pathwise-solutions
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

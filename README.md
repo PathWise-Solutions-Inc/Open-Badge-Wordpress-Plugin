@@ -1,11 +1,11 @@
-# Open Badge Factory by Pathwise Solutions Inc.
+# Open Badge Factory by Pathwise Solutions
 
 **Contributors**: Pathwise Solutions Inc., cvanderlinden  
 **Tags**: open-badge, badges, LearnDash  
 **Requires at least**: 5.8  
 **Tested up to**: 6.7.1  
 **Requires PHP**: 7.4  
-**Stable tag**: 1.0.0  
+**Stable tag**: 0.3.2 
 **License**: GPLv2 or later  
 **License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 

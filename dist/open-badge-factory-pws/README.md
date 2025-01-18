@@ -1,4 +1,32 @@
-# Open Badge Factory by Pathwise Solutions Inc.
+# Open Badge Factory by Pathwise Solutions
+
+**Contributors**: Pathwise Solutions Inc., cvanderlinden  
+**Tags**: open-badge, badges, LearnDash  
+**Requires at least**: 5.8  
+**Tested up to**: 6.7.1  
+**Requires PHP**: 7.4  
+**Stable tag**: 0.3.2 
+**License**: GPLv2 or later  
+**License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
+
+## Description
+Open Badge Factory by Pathwise Solutions integrates WordPress and LearnDash with Open Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
+
+## Features Include:
+- **Badge Management**: Sync badges with Open Badge Factory and display them dynamically on your WordPress site.
+- **Trigger-Based Issuance**: Link badge issuance to LearnDash course completions, user registration, and other actions.
+- **Gutenberg and Shortcode Support**: Easily display badges using blocks or shortcodes with customizable layouts.
+- **Admin Features**: Activity logging, settings management, and admin notices for seamless control.
+
+## Installation
+
+1. Download the plugin ZIP file (`open-badge-factory-pws.zip`).
+2. Log in to your WordPress admin dashboard.
+3. Navigate to **Plugins > Add New > Upload Plugin**.
+4. Select the ZIP file and click **Install Now**.
+5. Once installed, click **Activate** to enable the plugin.
+6. Navigate to the plugin settings page to configure the Open Badge Factory API credentials (client ID and secret).
+7. Use the synchronization button to import badges from Open Badge Factory.
 
 ## Release Notes
 
