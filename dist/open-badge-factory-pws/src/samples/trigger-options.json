@@ -1,0 +1,28 @@
+{
+  "LearnDash": {
+    "Course Complete": {
+      "label": "Course",
+      "objects": [
+        "sfwd-courses"
+      ]
+    },
+    "Lesson Complete": {
+      "label": "Lesson",
+      "objects": [
+        "sfwd-lessons"
+      ]
+    },
+    "Topic Complete": {
+      "label": "Topic",
+      "objects": [
+        "sfwd-topic"
+      ]
+    },
+    "Quiz Complete": {
+      "label": "Quiz",
+      "objects": [
+        "sfwd-quiz"
+      ]
+    }
+  }
+}

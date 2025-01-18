@@ -3,9 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { resolve } from 'path';
 
 export default defineConfig({
-  plugins: [
-    vue(),
-  ],
+  plugins: [vue()],
   build: {
     rollupOptions: {
       input: {
@@ -17,11 +15,12 @@ export default defineConfig({
       },
       output: {
         dir: resolve(__dirname, 'build/'),
-        entryFileNames: 'assets/[name].[hash].js',
-        chunkFileNames: 'assets/[name].[hash].js',
-        assetFileNames: 'assets/[name].[hash].[ext]',
+        entryFileNames: 'assets/[name].js', // Predictable filenames
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]', // Predictable asset names
       },
     },
+    cssCodeSplit: true, // Separate CSS from JS
   },
   server: {
     port: 3000,
