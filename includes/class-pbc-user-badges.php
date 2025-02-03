@@ -32,7 +32,7 @@ class PBC_User_Badges {
 		", $user_id));
 
 		if ($badges === null) {
-			return new WP_Error('no_badges_found', __('No badges found for this user', 'pbc'));
+			return new WP_Error('no_badges_found', __('No badges found for this user', 'pathwise-badge-connect'));
 		}
 
 		return $badges;

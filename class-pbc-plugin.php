@@ -140,14 +140,14 @@ class PBC_Plugin {
 		// Get the badges for the logged-in user
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return '<p>' . __( 'You must be logged in to view badges.', 'pbc' ) . '</p>';
+			return '<p>' . __( 'You must be logged in to view badges.', 'pathwise-badge-connect' ) . '</p>';
 		}
 
 		// Fetch badges from the database
 		$badges = $this->get_user_badges_from_database( $user_id );
 
 		if ( empty( $badges ) ) {
-			return '<p>' . __( 'No badges available.', 'pbc' ) . '</p>';
+			return '<p>' . __( 'No badges available.', 'pathwise-badge-connect' ) . '</p>';
 		}
 
 		// Prepare layout and attributes
@@ -167,7 +167,7 @@ class PBC_Plugin {
 				<?php foreach ( $badges as $badge ) : ?>
                     <div class="badge-item">
 						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
-                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                            <img src="<?php echo esc_url( $badge['image'] ); ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
                                  loading="lazy"
                                  style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
 						<?php endif; ?>
@@ -191,7 +191,7 @@ class PBC_Plugin {
 					<?php endif; ?>
                     <td class="badge-item">
 						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
-                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                            <img src="<?php echo esc_url( $badge['image'] ); ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
                                  loading="lazy"
                                  style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
 						<?php endif; ?>
@@ -221,7 +221,7 @@ class PBC_Plugin {
 				<?php foreach ( $badges as $badge ) : ?>
                     <li class="badge-item">
 						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
-                            <img src="<?php echo $badge['image']; ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
+                            <img src="<?php echo esc_url( $badge['image'] ); ?>" alt="<?php echo esc_attr( $badge['name'] ); ?>"
                                  loading="lazy"
                                  style="width: <?php echo esc_attr( $imageWidth ); ?>; max-width: <?php echo esc_attr( $imageMaxWidth ); ?>;">
 						<?php endif; ?>

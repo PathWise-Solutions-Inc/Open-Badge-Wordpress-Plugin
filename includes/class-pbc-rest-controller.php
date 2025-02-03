@@ -352,6 +352,7 @@ class PBC_REST_Controller {
 
 		// Ensure logs is an array
 		if (is_wp_error($logs)) {
+			/** @var WP_Error $logs */
 			return new WP_REST_Response(['error' => $logs->get_error_message()], 500);
 		}
 
@@ -479,7 +480,7 @@ class PBC_REST_Controller {
 		$user_id = get_current_user_id();
 
 		if (!$user_id) {
-			return new WP_REST_Response(['error' => __('User is not logged in', 'pbc')], 401);
+			return new WP_REST_Response(['error' => __('User is not logged in', 'pathwise-badge-connect')], 401);
 		}
 
 		$user_badges = new PBC_User_Badges();
@@ -504,23 +505,25 @@ class PBC_REST_Controller {
 		$log = new PBC_Log();
 		$csv_content = $log->generate_csv();
 
-		if (!$csv_content) {
-			header('Content-Type: application/json; charset=utf-8');
-			echo json_encode(['error' => 'No logs available to export.']);
-			exit;
+		if ( empty( $csv_content ) ) {
+			// Use wp_send_json_error to handle JSON output in a proper WordPress way.
+			wp_send_json_error( [ 'error' => __( 'No logs available to export.', 'pathwise-badge-connect' ) ] );
 		}
 
-		// Generate a filename with the current date
-		$filename = 'pathwise-badge-connect-logs-' . date('Y-m-d') . '.csv';
+		// Generate a sanitized filename with the current date.
+		$filename = sanitize_file_name( 'pathwise-badge-connect-logs-' . date( 'Y-m-d' ) . '.csv' );
 
-		// Set headers for CSV download
-		header('Content-Type: text/csv; charset=utf-8');
-		header("Content-Disposition: attachment; filename=\"$filename\"");
+		// Set headers for CSV download.
+		header( 'Content-Type: text/csv; charset=utf-8' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+
+		// Output the CSV content.
 		echo $csv_content;
 
-		// Prevent WordPress from appending additional content
+		// Prevent WordPress from appending additional content.
 		exit;
 	}
+
 
 	/**
 	 * Clear all logs.

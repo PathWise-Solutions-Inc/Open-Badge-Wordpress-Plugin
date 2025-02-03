@@ -22,6 +22,8 @@
   --error-text-color: #721c24;
   --unknown-bg-color: #ececec;
   --unknown-text-color: #636363;
+  --last-sync-bg-color: #f3e5f5;
+  --last-sync-text-color: #6a1b9a;
 }
 
 /* Global Styles */

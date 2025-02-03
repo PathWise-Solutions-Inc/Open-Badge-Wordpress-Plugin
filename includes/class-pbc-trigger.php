@@ -32,7 +32,7 @@ class PBC_Trigger {
 		);
 
 		if (!$trigger) {
-			return new WP_Error('trigger_not_found', __('Trigger not found', 'pbc'));
+			return new WP_Error('trigger_not_found', __('Trigger not found', 'pathwise-badge-connect'));
 		}
 
 		return $trigger;
@@ -64,7 +64,7 @@ class PBC_Trigger {
 
 		if ($updated === false) {
 			PBC_Log::log_error("Failed to update trigger ID {$id}", $id);
-			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'pbc'));
+			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'pathwise-badge-connect'));
 		}
 
 		PBC_Log::log_success("Trigger ID {$id} successfully updated.", $id);
@@ -96,7 +96,7 @@ class PBC_Trigger {
 
 		if ($inserted === false) {
 			PBC_Log::log_error("Failed to create new trigger.");
-			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'pbc'));
+			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'pathwise-badge-connect'));
 		}
 
 		$trigger_id = $wpdb->insert_id;
@@ -117,7 +117,7 @@ class PBC_Trigger {
 
 		if ($deleted === false) {
 			PBC_Log::log_error("Failed to delete trigger ID {$trigger_id}", $trigger_id);
-			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'pbc'));
+			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'pathwise-badge-connect'));
 		}
 
 		PBC_Log::log_success("Trigger ID {$trigger_id} successfully deleted.", $trigger_id);
@@ -146,7 +146,7 @@ class PBC_Trigger {
 		} catch (Exception $e) {
 			// Log the error
 			PBC_Log::log_error('Error fetching triggers: ' . $e->getMessage());
-			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'pbc'));
+			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'pathwise-badge-connect'));
 		}
 	}
 }
