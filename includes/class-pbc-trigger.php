@@ -3,13 +3,13 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Trigger {
+class PBC_Trigger {
 
 	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'obf_pws_triggers';
+		$this->table_name = $wpdb->prefix . 'pbc_triggers';
 	}
 
 	/**
@@ -32,7 +32,7 @@ class OBF_Trigger {
 		);
 
 		if (!$trigger) {
-			return new WP_Error('trigger_not_found', __('Trigger not found', 'obf'));
+			return new WP_Error('trigger_not_found', __('Trigger not found', 'pbc'));
 		}
 
 		return $trigger;
@@ -63,11 +63,11 @@ class OBF_Trigger {
 		);
 
 		if ($updated === false) {
-			OBF_Log::log_error("Failed to update trigger ID {$id}", $id);
-			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'obf'));
+			PBC_Log::log_error("Failed to update trigger ID {$id}", $id);
+			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'pbc'));
 		}
 
-		OBF_Log::log_success("Trigger ID {$id} successfully updated.", $id);
+		PBC_Log::log_success("Trigger ID {$id} successfully updated.", $id);
 		return $this->get_trigger($id);
 	}
 
@@ -95,12 +95,12 @@ class OBF_Trigger {
 		);
 
 		if ($inserted === false) {
-			OBF_Log::log_error("Failed to create new trigger.");
-			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'obf'));
+			PBC_Log::log_error("Failed to create new trigger.");
+			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'pbc'));
 		}
 
 		$trigger_id = $wpdb->insert_id;
-		OBF_Log::log_success("Trigger ID {$trigger_id} successfully created.", $trigger_id);
+		PBC_Log::log_success("Trigger ID {$trigger_id} successfully created.", $trigger_id);
 		return $this->get_trigger($trigger_id);
 	}
 
@@ -116,11 +116,11 @@ class OBF_Trigger {
 		$deleted = $wpdb->delete($this->table_name, ['id' => $trigger_id]);
 
 		if ($deleted === false) {
-			OBF_Log::log_error("Failed to delete trigger ID {$trigger_id}", $trigger_id);
-			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'obf'));
+			PBC_Log::log_error("Failed to delete trigger ID {$trigger_id}", $trigger_id);
+			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'pbc'));
 		}
 
-		OBF_Log::log_success("Trigger ID {$trigger_id} successfully deleted.", $trigger_id);
+		PBC_Log::log_success("Trigger ID {$trigger_id} successfully deleted.", $trigger_id);
 		return true;
 	}
 
@@ -145,8 +145,8 @@ class OBF_Trigger {
 			return $triggers ?: [];
 		} catch (Exception $e) {
 			// Log the error
-			OBF_Log::log_error('Error fetching triggers: ' . $e->getMessage());
-			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'obf'));
+			PBC_Log::log_error('Error fetching triggers: ' . $e->getMessage());
+			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'pbc'));
 		}
 	}
 }

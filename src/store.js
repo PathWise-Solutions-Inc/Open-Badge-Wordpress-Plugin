@@ -51,7 +51,7 @@ export default createStore({
                 case 'Credential Error':
                 case 'Not Connected':
                 case 'Error Checking Status':
-                case 'OBF Error':
+                case 'PBC Error':
                     state.connectionStatusClass = 'pill pill-red';
                     break;
                 default:
@@ -63,11 +63,11 @@ export default createStore({
     actions: {
         async fetchLogs({ commit }) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/logs', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/logs', {
                     method: 'GET',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -84,11 +84,11 @@ export default createStore({
         },
         async fetchBadges({ commit }) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/badges', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/badges', {
                     method: 'GET',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -104,11 +104,11 @@ export default createStore({
         },
         async fetchTriggers({ commit }) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/triggers', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/triggers', {
                     method: 'GET',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -131,12 +131,12 @@ export default createStore({
         },
         async saveTriggerToStore({ commit }, trigger) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/triggers', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/triggers', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                     body: JSON.stringify(trigger),
                 });
@@ -161,11 +161,11 @@ export default createStore({
         },
         async deleteTrigger({ commit }, triggerId) {
             try {
-                const response = await fetch(`/wp-json/obf-pws/v1/triggers/${triggerId}`, {
+                const response = await fetch(`/wp-json/pathwise-badge-connect/v1/triggers/${triggerId}`, {
                     method: 'DELETE',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -181,11 +181,11 @@ export default createStore({
         },
         async fetchNotices({ commit }) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/notices', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/notices', {
                     method: 'GET',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -201,11 +201,11 @@ export default createStore({
         },
         async dismissNotice({ commit }, noticeId) {
             try {
-                const response = await fetch(`/wp-json/obf-pws/v1/notices/${noticeId}`, {
+                const response = await fetch(`/wp-json/pathwise-badge-connect/v1/notices/${noticeId}`, {
                     method: 'DELETE',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 
@@ -220,11 +220,11 @@ export default createStore({
         },
         async fetchConnectionStatus({ commit }) {
             try {
-                const response = await fetch('/wp-json/obf-pws/v1/connection-status', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/connection-status', {
                     method: 'GET',
                     headers: {
-                        'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-                        'X-WP-Nonce': obfOptions.nonce,
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
                     },
                 });
 

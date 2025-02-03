@@ -3,7 +3,7 @@
     <ul>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'obf-pws-badges' } }"
+            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect' } }"
             :class="{ active: isActiveTab('') }"
         >
           Badges
@@ -11,7 +11,7 @@
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'obf-pws-badges', tab: 'triggers' } }"
+            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'triggers' } }"
             :class="{ active: isActiveTab('triggers') }"
         >
           Triggers
@@ -19,7 +19,7 @@
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'obf-pws-badges', tab: 'settings' } }"
+            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'settings' } }"
             :class="{ active: isActiveTab('settings') }"
         >
           Settings
@@ -27,7 +27,7 @@
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'obf-pws-badges', tab: 'log' } }"
+            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'log' } }"
             :class="{ active: isActiveTab('log') }"
         >
           Log

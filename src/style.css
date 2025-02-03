@@ -25,7 +25,7 @@
 }
 
 /* Global Styles */
-#obf-pws {
+#pathwise-badge-connect {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -36,7 +36,7 @@
   line-height: 1.6;
 }
 
-#obf-pws h1, #obf-pws h2, #obf-pws h3, #obf-pws h4, #obf-pws h5, #obf-pws h6 {
+#pathwise-badge-connect h1, #pathwise-badge-connect h2, #pathwise-badge-connect h3, #pathwise-badge-connect h4, #pathwise-badge-connect h5, #pathwise-badge-connect h6 {
   margin: 0;
   padding: 0.5em 0;
 }
@@ -45,37 +45,37 @@ p {
   margin: 0 0 1em 0;
 }
 
-#obf-pws {
+#pathwise-badge-connect {
   max-width: 1200px;
   padding: 20px;
 }
 
-#obf-pws .app-header {
+#pathwise-badge-connect .app-header {
   background-color: var(--header-bg-color);
   color: var(--header-text-color);
   padding: 20px;
   text-align: left;
 }
 
-#obf-pws .app-header h1.app-title {
+#pathwise-badge-connect .app-header h1.app-title {
   margin: 0;
   padding: 0;
   font-size: 2.5em;
 }
 
-#obf-pws .app-header h2.app-sub-title {
+#pathwise-badge-connect .app-header h2.app-sub-title {
   margin: 0 0 1em;
   padding: 0;
   font-size: 1.5em;
   color: var(--sub-title-color);
 }
 
-#obf-pws .nav-bar {
+#pathwise-badge-connect .nav-bar {
   padding: 10px 0;
   text-align: left;
 }
 
-#obf-pws .nav-bar ul {
+#pathwise-badge-connect .nav-bar ul {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -83,11 +83,11 @@ p {
   gap: 20px; /* Spaced out items */
 }
 
-#obf-pws .nav-bar li {
+#pathwise-badge-connect .nav-bar li {
   margin: 0;
 }
 
-#obf-pws .nav-bar a {
+#pathwise-badge-connect .nav-bar a {
   display: inline-block;
   padding: 8px 20px;
   font-size: 22px;
@@ -100,71 +100,71 @@ p {
   transition: background-color 0.3s, color 0.3s;
 }
 
-#obf-pws .nav-bar a:hover,
-#obf-pws .nav-bar a.active {
+#pathwise-badge-connect .nav-bar a:hover,
+#pathwise-badge-connect .nav-bar a.active {
   background-color: var(--nav-text-color);
   color: var(--background-color);
 }
 
-#obf-pws main {
+#pathwise-badge-connect main {
   background-color: var(--background-color);
   padding: 20px;
   border-radius: 8px;
 }
 
-#obf-pws .pill-green {
+#pathwise-badge-connect .pill-green {
   background-color: var(--success-bg-color);
   color: var(--success-text-color);
 }
 
-#obf-pws .pill-blue {
+#pathwise-badge-connect .pill-blue {
   background-color: var(--info-bg-color);
   color: var(--info-text-color);
 }
 
-#obf-pws .pill-yellow {
+#pathwise-badge-connect .pill-yellow {
   background-color: var(--warning-bg-color);
   color: var(--warning-text-color);
 }
 
-#obf-pws .pill-red {
+#pathwise-badge-connect .pill-red {
   background-color: var(--error-bg-color);
   color: var(--error-text-color);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  #obf-pws .nav-bar ul {
+  #pathwise-badge-connect .nav-bar ul {
     flex-direction: column;
   }
 
-  #obf-pws .nav-bar li {
+  #pathwise-badge-connect .nav-bar li {
     margin: 5px 0;
   }
 
-  #obf-pws {
+  #pathwise-badge-connect {
     padding: 10px;
   }
 
-  #obf-pws main {
+  #pathwise-badge-connect main {
     padding: 10px;
   }
 }
 
 /* Settings Page Styles */
-#obf-pws .settings-container {
+#pathwise-badge-connect .settings-container {
   width: 100%;
 }
 
-#obf-pws .section {
+#pathwise-badge-connect .section {
   margin-bottom: 20px;
 }
 
-#obf-pws h3 {
+#pathwise-badge-connect h3 {
   margin-bottom: 20px;
 }
 
-#obf-pws .form-group-inline {
+#pathwise-badge-connect .form-group-inline {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
@@ -172,16 +172,16 @@ p {
   width: 100%;
 }
 
-#obf-pws .form-group-inline label {
+#pathwise-badge-connect .form-group-inline label {
   font-weight: bold;
   margin-right: 10px;
 }
 
-#obf-pws .form-group-inline .pill {
+#pathwise-badge-connect .form-group-inline .pill {
   margin-left: 10px;
 }
 
-#obf-pws .form-group {
+#pathwise-badge-connect .form-group {
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;
@@ -189,14 +189,14 @@ p {
   width: 100%;
 }
 
-#obf-pws label {
+#pathwise-badge-connect label {
   font-weight: bold;
   margin-bottom: 5px;
 }
 
-#obf-pws input[type="text"],
-#obf-pws input[type="password"],
-#obf-pws select {
+#pathwise-badge-connect input[type="text"],
+#pathwise-badge-connect input[type="password"],
+#pathwise-badge-connect select {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
@@ -204,57 +204,57 @@ p {
   border-radius: 4px;
 }
 
-#obf-pws .pill {
+#pathwise-badge-connect .pill {
   padding: 5px 10px;
   border-radius: 20px;
   font-weight: bold;
 }
 
-#obf-pws .status-connected {
+#pathwise-badge-connect .status-connected {
   background-color: var(--success-bg-color);
   color: var(--success-text-color);
 }
 
-#obf-pws .status-error {
+#pathwise-badge-connect .status-error {
   background-color: var(--error-bg-color);
   color: var(--error-text-color);
 }
 
-#obf-pws .status-unknown {
+#pathwise-badge-connect .status-unknown {
   background-color: var(--unknown-bg-color);
   color: var(--unknown-text-color);
 }
 
-#obf-pws .last-sync {
+#pathwise-badge-connect .last-sync {
   background-color: var(--last-sync-bg-color); /* Light purple background */
   color: var(--last-sync-text-color); /* Dark purple text */
 }
 
-#obf-pws hr {
+#pathwise-badge-connect hr {
   border: 0;
   border-top: 1px solid #ccc;
   margin: 20px 0;
 }
 
-#obf-pws select {
+#pathwise-badge-connect select {
   background-color: #fff;
 }
 
 /* Toggle Switch Styling */
-#obf-pws .switch {
+#pathwise-badge-connect .switch {
   position: relative;
   display: inline-block;
   width: 40px;
   height: 20px;
 }
 
-#obf-pws .switch input {
+#pathwise-badge-connect .switch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
 
-#obf-pws .slider {
+#pathwise-badge-connect .slider {
   position: absolute;
   cursor: pointer;
   top: 0;
@@ -266,7 +266,7 @@ p {
   border-radius: 20px;
 }
 
-#obf-pws .slider:before {
+#pathwise-badge-connect .slider:before {
   position: absolute;
   content: "";
   height: 16px;
@@ -278,10 +278,10 @@ p {
   border-radius: 50%;
 }
 
-#obf-pws input:checked + .slider {
+#pathwise-badge-connect input:checked + .slider {
   background-color: var(--primary-color);
 }
 
-#obf-pws input:checked + .slider:before {
+#pathwise-badge-connect input:checked + .slider:before {
   transform: translateX(20px);
 }

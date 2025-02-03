@@ -65,7 +65,7 @@
             <td>{{ log.message }}</td>
             <td>
               <a :href="getPostLink(log.post_id)" v-if="log.post_id">{{ log.post_title }}</a>
-              <span v-else><a href="/wp-admin/admin.php?page=obf-pws-badges">Badge Admin</a></span>
+              <span v-else><a href="/wp-admin/admin.php?page=pathwise-badge-connect">Badge Admin</a></span>
             </td>
             <td>{{ formatDate(log.created_at) }}</td>
           </tr>
@@ -176,11 +176,11 @@ export default {
       this.loading = true;
       try {
         // Make a request to the backend route
-        const response = await fetch('/wp-json/obf-pws/v1/export-logs', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/export-logs', {
           method: 'GET',
           headers: {
-            'X-WP-Nonce': obfOptions.nonce,
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859'
+            'X-WP-Nonce': pbcOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
           },
         });
 
@@ -214,11 +214,11 @@ export default {
 
       this.loading = true;
       try {
-        const response = await fetch('/wp-json/obf-pws/v1/clear-logs', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/clear-logs', {
           method: 'DELETE',
           headers: {
-            'X-WP-Nonce': obfOptions.nonce,
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859'
+            'X-WP-Nonce': pbcOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
           },
         });
 
@@ -274,7 +274,7 @@ export default {
       return new Date(date).toLocaleDateString('en-US', options);
     },
     getBadgeLink(badgeId) {
-      return badgeId ? `/wp-admin/admin.php?page=obf-pws-badges` : '#';
+      return badgeId ? `/wp-admin/admin.php?page=pathwise-badge-connect` : '#';
     },
     getPostLink(postId) {
       return postId ? `/wp-admin/post.php?post=${postId}&action=edit` : '#';

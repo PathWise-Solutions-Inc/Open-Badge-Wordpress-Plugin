@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Plugin {
+class PBC_Plugin {
 
 	public function __construct() {
 		$this->load_dependencies();
@@ -12,19 +12,19 @@ class OBF_Plugin {
         $this->define_shortcodes();
 
 		// Initialize the trigger executor
-		new OBF_Trigger_Executor();
+		new PBC_Trigger_Executor();
 	}
 
 	private function load_dependencies(): void {
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-admin-menu.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-scripts.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-api-client.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-badge.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-trigger.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-rest-controller.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-notice-handler.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-trigger-executor.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-obf-user-badges.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-admin-menu.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-scripts.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-api-client.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-badge.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-trigger.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-rest-controller.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-notice-handler.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-trigger-executor.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-user-badges.php';
 	}
 
 	private function initialize_hooks(): void {
@@ -33,7 +33,7 @@ class OBF_Plugin {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'admin_init', [ $this, 'check_admin_notices' ] );
-		add_action( 'init', [ $this, 'register_obf_block' ] );
+		add_action( 'init', [ $this, 'register_pbc_block' ] );
 	}
 
 	private function define_shortcodes(): void {
@@ -41,26 +41,26 @@ class OBF_Plugin {
 	}
 
 	public function register_menu(): void {
-		$obf_admin_menu = new OBF_Admin_Menu();
-		$obf_admin_menu->register_menu();
+		$pbc_admin_menu = new PBC_Admin_Menu();
+		$pbc_admin_menu->register_menu();
 	}
 
 	public function enqueue_scripts(): void {
-		$obf_scripts = new OBF_Scripts();
-		$obf_scripts->enqueue();
+		$pbc_scripts = new PBC_Scripts();
+		$pbc_scripts->enqueue();
 	}
 
 	public function register_rest_routes(): void {
-		$obf_rest_controller = new OBF_REST_Controller();
-		$obf_rest_controller->register_routes();
+		$pbc_rest_controller = new PBC_REST_Controller();
+		$pbc_rest_controller->register_routes();
 	}
 
 	public function check_admin_notices(): void {
-		$notice_handler = new OBF_Notice_Handler();
+		$notice_handler = new PBC_Notice_Handler();
 
-		$client_id         = get_option( 'obf_client_id' );
-		$client_secret     = get_option( 'obf_client_secret' );
-		$api_client        = new OBF_API_Client( $client_id, $client_secret );
+		$client_id         = get_option( 'pbc_client_id' );
+		$client_secret     = get_option( 'pbc_client_secret' );
+		$api_client        = new PBC_API_Client( $client_id, $client_secret );
 		$connection_status = $api_client->get_connection_status();
 
 		// Check if Client ID is filled
@@ -86,11 +86,19 @@ class OBF_Plugin {
 	}
 
 	public function activate(): void {
+		$installed_version = get_option( 'pbc_db_version' );
+
+		// Run schema creation only if the version is missing or outdated.
+		if ( $installed_version !== PBC_PLUGIN_VERSION ) {
+			$this->create_tables();
+			update_option( 'pbc_db_version', PBC_PLUGIN_VERSION );
+		}
 		$this->create_tables();
-		$this->obf_add_badge_capabilities();
+		$this->pbc_add_badge_capabilities();
+		$this->pbc_local_api_key();
 	}
 
-	function obf_add_badge_capabilities(): void {
+	function pbc_add_badge_capabilities(): void {
 		// Define roles that should have the 'read_badges' capability
 		$roles = ['administrator', 'editor', 'author', 'subscriber'];
 
@@ -102,10 +110,10 @@ class OBF_Plugin {
 		}
 	}
 
-	public function register_obf_block(): void {
-		if ( !WP_Block_Type_Registry::get_instance()->is_registered( 'obf/badges-block' ) ) {
-			register_block_type( 'obf/badges-block', [
-				'render_callback' => [ $this, 'render_obf_badges_block' ],
+	public function register_pbc_block(): void {
+		if ( !WP_Block_Type_Registry::get_instance()->is_registered( 'pbc/badges-block' ) ) {
+			register_block_type( 'pbc/badges-block', [
+				'render_callback' => [ $this, 'render_pbc_badges_block' ],
 				'attributes'      => [
 					'layout'         => [
 						'type'    => 'string',
@@ -128,18 +136,18 @@ class OBF_Plugin {
 		}
 	}
 
-	public function render_obf_badges_block( $attributes ): string {
+	public function render_pbc_badges_block( $attributes ): string {
 		// Get the badges for the logged-in user
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return '<p>' . __( 'You must be logged in to view badges.', 'obf' ) . '</p>';
+			return '<p>' . __( 'You must be logged in to view badges.', 'pbc' ) . '</p>';
 		}
 
 		// Fetch badges from the database
 		$badges = $this->get_user_badges_from_database( $user_id );
 
 		if ( empty( $badges ) ) {
-			return '<p>' . __( 'No badges available.', 'obf' ) . '</p>';
+			return '<p>' . __( 'No badges available.', 'pbc' ) . '</p>';
 		}
 
 		// Prepare layout and attributes
@@ -155,7 +163,7 @@ class OBF_Plugin {
 		// Render based on the selected layout
 		if ( $layout === 'grid' ) {
 			?>
-            <div class="obf-badges-block grid" style="--columns: <?php echo esc_attr( $columns ); ?>;">
+            <div class="pbc-badges-block grid" style="--columns: <?php echo esc_attr( $columns ); ?>;">
 				<?php foreach ( $badges as $badge ) : ?>
                     <div class="badge-item">
 						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
@@ -172,7 +180,7 @@ class OBF_Plugin {
 			<?php
 		} elseif ( $layout === 'table' ) {
 			?>
-            <table class="obf-badges-block table" style="--columns: <?php echo esc_attr( $columns ); ?>;">
+            <table class="pbc-badges-block table" style="--columns: <?php echo esc_attr( $columns ); ?>;">
                 <tbody>
 				<?php
 				$count = 0;
@@ -209,7 +217,7 @@ class OBF_Plugin {
 			<?php
 		} elseif ( $layout === 'list' ) {
 			?>
-            <ul class="obf-badges-block list">
+            <ul class="pbc-badges-block list">
 				<?php foreach ( $badges as $badge ) : ?>
                     <li class="badge-item">
 						<?php if ( $showBadgeImage && ! empty( $badge['image'] ) ) : ?>
@@ -244,7 +252,7 @@ class OBF_Plugin {
 		// Parse the provided attributes against the defaults
 		$attributes = shortcode_atts( $defaults, $atts );
 
-		// Convert attributes to match the format expected by render_obf_badges_block
+		// Convert attributes to match the format expected by render_pbc_badges_block
 		$attributes = [
 			'layout'          => $attributes['layout'],
 			'columns'         => (int) $attributes['columns'],
@@ -255,14 +263,14 @@ class OBF_Plugin {
 		];
 
 		// Call the existing render function with the mapped attributes
-		return $this->render_obf_badges_block( $attributes );
+		return $this->render_pbc_badges_block( $attributes );
 	}
 
 	// Helper function to get badges from the database
 	private function get_user_badges_from_database( $user_id ): array {
 		global $wpdb;
-		$table_name_user_badges = $wpdb->prefix . 'obf_pws_user_badges';
-		$table_name_badges = $wpdb->prefix . 'obf_pws_badges';
+		$table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
+		$table_name_badges = $wpdb->prefix . 'pbc_badges';
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
@@ -278,80 +286,80 @@ class OBF_Plugin {
 
 	private function create_tables(): void {
 		global $wpdb;
-
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// Create obf_pws_badges table
-		$table_name_badges = $wpdb->prefix . 'obf_pws_badges';
-		$sql_badges        = "CREATE TABLE $table_name_badges (
-	        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	        obf_client_id VARCHAR(255) NOT NULL,
-	        obf_id VARCHAR(255) NOT NULL,
-	        name VARCHAR(255) NOT NULL,
-	        description TEXT NOT NULL,
-	        image MEDIUMTEXT NOT NULL,
-	        category TEXT NOT NULL,
-	        alt_language TEXT NOT NULL,
-	        expires INT(11) NOT NULL,
-	        modified_time BIGINT(20) UNSIGNED NOT NULL,
-	        created_time BIGINT(20) UNSIGNED NOT NULL,
-	        PRIMARY KEY (id)
-	    ) $charset_collate;";
+		// Create pbc_badges table
+		$table_name_badges = $wpdb->prefix . 'pbc_badges';
+		$sql_badges = "CREATE TABLE $table_name_badges (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        pbc_client_id VARCHAR(255) NOT NULL,
+        pbc_id VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        image MEDIUMTEXT NOT NULL,
+        category TEXT NOT NULL,
+        alt_language TEXT NOT NULL,
+        expires INT(11) NOT NULL,
+        modified_time BIGINT(20) UNSIGNED NOT NULL,
+        created_time BIGINT(20) UNSIGNED NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
 
-		// Create obf_pws_triggers table
-		$table_name_triggers = $wpdb->prefix . 'obf_pws_triggers';
-		$sql_triggers        = "CREATE TABLE $table_name_triggers (
-	        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	        badge_id BIGINT(20) UNSIGNED NOT NULL,
-	        extension VARCHAR(255) NOT NULL,
-	        trigger_type VARCHAR(255) NOT NULL,
-	        object VARCHAR(255) NOT NULL,
-	        triggered_count INT UNSIGNED NOT NULL DEFAULT 0,
-	        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-	        PRIMARY KEY (id)
-	    ) $charset_collate;";
+		// Create pbc_triggers table
+		$table_name_triggers = $wpdb->prefix . 'pbc_triggers';
+		$sql_triggers = "CREATE TABLE $table_name_triggers (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        badge_id BIGINT(20) UNSIGNED NOT NULL,
+        extension VARCHAR(255) NOT NULL,
+        trigger_type VARCHAR(255) NOT NULL,
+        object VARCHAR(255) NOT NULL,
+        triggered_count INT UNSIGNED NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
 
-		// Create obf_pws_logs table
-		$table_name_logs = $wpdb->prefix . 'obf_pws_logs';
-		$sql_logs        = "CREATE TABLE $table_name_logs (
-	        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	        trigger_id BIGINT(20) UNSIGNED NULL,
-	        user_id BIGINT(20) UNSIGNED NULL,
-	        post_id BIGINT(20) UNSIGNED NULL,
-	        type VARCHAR(255) NULL,
-	        message TEXT NULL,
-	        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-	        PRIMARY KEY (id)
-	    ) $charset_collate;";
+		// Create pbc_logs table
+		$table_name_logs = $wpdb->prefix . 'pbc_logs';
+		$sql_logs = "CREATE TABLE $table_name_logs (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        trigger_id BIGINT(20) UNSIGNED NULL,
+        user_id BIGINT(20) UNSIGNED NULL,
+        post_id BIGINT(20) UNSIGNED NULL,
+        type VARCHAR(255) NULL,
+        message TEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
 
-		// Create obf_pws_notices table
-		$table_name_notices = $wpdb->prefix . 'obf_pws_notices';
-		$sql_notices        = "CREATE TABLE $table_name_notices (
-	        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	        slug VARCHAR(100) NOT NULL UNIQUE,
-	        status BOOLEAN NOT NULL DEFAULT TRUE,
-	        type VARCHAR(50) NOT NULL,
-	        subject VARCHAR(255) NOT NULL,
-	        description TEXT NOT NULL,
-	        action VARCHAR(255) NULL,
-	        created_date DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	        completed_date DATETIME NULL,
-	        PRIMARY KEY (id)
-	    ) $charset_collate;";
+		// Create pbc_notices table
+		$table_name_notices = $wpdb->prefix . 'pbc_notices';
+		$sql_notices = "CREATE TABLE $table_name_notices (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        slug VARCHAR(100) NOT NULL UNIQUE,
+        status BOOLEAN NOT NULL DEFAULT TRUE,
+        type VARCHAR(50) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        action VARCHAR(255) NULL,
+        created_date DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        completed_date DATETIME NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
 
-		// Create obf_pws_user_badges table
-		$table_name_user_badges = $wpdb->prefix . 'obf_pws_user_badges';
-		$sql_user_badges        = "CREATE TABLE $table_name_user_badges (
-	        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	        user_id BIGINT(20) UNSIGNED NOT NULL,
-	        badge_id BIGINT(20) UNSIGNED NOT NULL,
-	        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-	        PRIMARY KEY (id)
-	    ) $charset_collate;";
+		// Create pbc_user_badges table
+		$table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
+		$sql_user_badges = "CREATE TABLE $table_name_user_badges (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id BIGINT(20) UNSIGNED NOT NULL,
+        badge_id BIGINT(20) UNSIGNED NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
 
+		// Run the table creation queries.
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql_badges );
 		dbDelta( $sql_triggers );
@@ -359,36 +367,39 @@ class OBF_Plugin {
 		dbDelta( $sql_notices );
 		dbDelta( $sql_user_badges );
 
-		// Add foreign key constraints if they don't exist
-		if ( ! $this->foreign_key_exists( $table_name_triggers, 'fk_badge_id' ) ) {
-			$wpdb->query( "ALTER TABLE $table_name_triggers 
-            ADD CONSTRAINT fk_badge_id 
-            FOREIGN KEY (badge_id) REFERENCES {$wpdb->prefix}obf_pws_badges(id) ON DELETE CASCADE" );
-		}
+		// Drop existing foreign key constraints if they exist.
+		// The @ operator suppresses warnings if the constraint isn’t present.
+		@$wpdb->query( "ALTER TABLE $table_name_triggers DROP FOREIGN KEY fk_badge_id" );
+		@$wpdb->query( "ALTER TABLE $table_name_user_badges DROP FOREIGN KEY fk_user_id" );
+		@$wpdb->query( "ALTER TABLE $table_name_user_badges DROP FOREIGN KEY fk_badge_id_user_badges" );
 
-		if ( ! $this->foreign_key_exists( $table_name_user_badges, 'fk_user_id' ) ) {
-			$wpdb->query( "ALTER TABLE $table_name_user_badges 
-            ADD CONSTRAINT fk_user_id 
-            FOREIGN KEY (user_id) REFERENCES {$wpdb->prefix}users(ID) ON DELETE CASCADE" );
-		}
+		// Add foreign key constraints.
+		$wpdb->query( "ALTER TABLE $table_name_triggers 
+        ADD CONSTRAINT fk_badge_id 
+        FOREIGN KEY (badge_id) REFERENCES $table_name_badges(id) ON DELETE CASCADE" );
 
-		if ( ! $this->foreign_key_exists( $table_name_user_badges, 'fk_badge_id_user_badges' ) ) {
-			$wpdb->query( "ALTER TABLE $table_name_user_badges 
-            ADD CONSTRAINT fk_badge_id_user_badges 
-            FOREIGN KEY (badge_id) REFERENCES {$wpdb->prefix}obf_pws_badges(id) ON DELETE CASCADE" );
-		}
+		$wpdb->query( "ALTER TABLE $table_name_user_badges 
+        ADD CONSTRAINT fk_user_id 
+        FOREIGN KEY (user_id) REFERENCES {$wpdb->prefix}users(ID) ON DELETE CASCADE" );
+
+		$wpdb->query( "ALTER TABLE $table_name_user_badges 
+        ADD CONSTRAINT fk_badge_id_user_badges 
+        FOREIGN KEY (badge_id) REFERENCES $table_name_badges(id) ON DELETE CASCADE" );
 	}
 
-	private function foreign_key_exists( $table, $key_name ): ?string {
-		global $wpdb;
-		$query = $wpdb->prepare(
-			"SELECT CONSTRAINT_NAME 
-			 FROM information_schema.KEY_COLUMN_USAGE 
-			 WHERE TABLE_NAME = %s 
-			 AND CONSTRAINT_NAME = %s",
-			$table, $key_name
-		);
-		return $wpdb->get_var( $query );
+	/**
+	 * Retrieve the local API key, or generate one if it doesn't exist.
+	 *
+	 * @return string The API key.
+	 */
+	public function pbc_local_api_key(): string {
+		$api_key = get_option( 'pbc_api_key' );
+		if ( empty( $api_key ) ) {
+			// Generate a 32-character API key. Adjust parameters as needed.
+			$api_key = wp_generate_password( 32, false, false );
+			update_option( 'pbc_api_key', $api_key );
+		}
+		return $api_key;
 	}
 
 }

@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import archiver from 'archiver';
 import fs from 'fs';
 
-const pluginName = 'open-badge-factory-pws';
+const pluginName = 'pathwise-badge-connect';
 const distFolder = resolve('dist');
 const buildFolder = resolve('build');
 const outputFilePath = resolve(distFolder, `${pluginName}.zip`);
@@ -31,8 +31,8 @@ const coreFilesAndFolders = [
     'includes',
     'public',
     'src/samples',
-    'class-obf-plugin.php',
-    'open-badge-factory-pws.php',
+    'class-pbc-plugin.php',
+    'pathwise-badge-connect.php',
     'README.md',
 ];
 coreFilesAndFolders.forEach((item) => {

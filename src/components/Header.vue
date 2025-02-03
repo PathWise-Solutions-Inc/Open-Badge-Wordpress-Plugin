@@ -2,7 +2,7 @@
 
 <template>
   <header class="app-header">
-    <h1 class="app-title">Open Badge Factory</h1>
+    <h1 class="app-title">Pathwise Badge Connect</h1>
     <h2 class="app-sub-title">by Pathwise Solutions Inc.</h2>
     <admin-notices></admin-notices>
     <nav-bar></nav-bar>

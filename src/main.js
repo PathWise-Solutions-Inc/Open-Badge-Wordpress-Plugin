@@ -9,4 +9,4 @@ const app = createApp(App);
 app.use(router);
 app.use(store);
 app.component('font-awesome-icon', FontAwesomeIcon);
-app.mount('#obf-pws');
+app.mount('#pathwise-badge-connect');

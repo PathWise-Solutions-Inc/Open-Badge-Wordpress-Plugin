@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Trigger_Executor {
+class PBC_Trigger_Executor {
 
 	public function __construct() {
 		$this->initialize_hooks();
@@ -58,7 +58,7 @@ class OBF_Trigger_Executor {
 	public function execute_trigger($trigger_type, $object_id, $user_id): void {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . 'obf_pws_triggers';
+		$table_name = $wpdb->prefix . 'pbc_triggers';
 		$trigger = $wpdb->get_row($wpdb->prepare(
 			"SELECT * FROM $table_name WHERE trigger_type = %s AND object = %s",
 			$trigger_type, $object_id
@@ -71,17 +71,17 @@ class OBF_Trigger_Executor {
 		$badge_id = $trigger->badge_id;
 		$email = get_userdata($user_id)->user_email;
 
-		$client_id = get_option('obf_client_id');
-		$client_secret = get_option('obf_client_secret');
-		$api_client = new OBF_API_Client($client_id, $client_secret);
+		$client_id = get_option('pbc_client_id');
+		$client_secret = get_option('pbc_client_secret');
+		$api_client = new PBC_API_Client($client_id, $client_secret);
 
 		$response = $api_client->issue_badge($badge_id, [$email]);
 
 		if (!is_wp_error($response)) {
-			OBF_Log::log_success('Badge successfully issued.', $trigger->id, $object_id);
+			PBC_Log::log_success('Badge successfully issued.', $trigger->id, $object_id);
 
-			// Add the badge to the obf_pws_user_badges table
-			$table_name_user_badges = $wpdb->prefix . 'obf_pws_user_badges';
+			// Add the badge to the pbc_user_badges table
+			$table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
 			$wpdb->insert(
 				$table_name_user_badges,
 				[
@@ -93,7 +93,7 @@ class OBF_Trigger_Executor {
 			);
 
 		} else {
-			OBF_Log::log_error('Badge issuance failed: ' . $response->get_error_message(), $trigger->id, $object_id);
+			PBC_Log::log_error('Badge issuance failed: ' . $response->get_error_message(), $trigger->id, $object_id);
 		}
 
 		$this->increment_trigger_count($trigger->id);
@@ -101,7 +101,7 @@ class OBF_Trigger_Executor {
 
 	private function increment_trigger_count($trigger_id): void {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'obf_pws_triggers';
+		$table_name = $wpdb->prefix . 'pbc_triggers';
 		$wpdb->query(
 			$wpdb->prepare(
 				"UPDATE $table_name SET triggered_count = triggered_count + 1 WHERE id = %d",

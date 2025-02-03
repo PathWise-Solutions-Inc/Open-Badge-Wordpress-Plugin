@@ -1,11 +1,11 @@
 <?php
-// includes/class-obf-badge.php
-class OBF_Badge {
+// includes/class-pbc-badge.php
+class PBC_Badge {
 	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'obf_pws_badges';
+		$this->table_name = $wpdb->prefix . 'pbc_badges';
 	}
 
 	public function get_badges() {
@@ -30,14 +30,14 @@ class OBF_Badge {
 
 		// Step 1: Retrieve all existing badges in the database
 		$existing_badges = $wpdb->get_results("
-			SELECT id, obf_id, obf_client_id, modified_time
+			SELECT id, pbc_id, pbc_client_id, modified_time
 			FROM {$this->table_name}
 		");
 
-		// Create an associative array of existing badges with the combination of obf_id and obf_client_id as the key
+		// Create an associative array of existing badges with the combination of pbc_id and pbc_client_id as the key
 		$existing_badge_map = [];
 		foreach ($existing_badges as $badge) {
-			$key = $badge->obf_id . '_' . $badge->obf_client_id;
+			$key = $badge->pbc_id . '_' . $badge->pbc_client_id;
 			$existing_badge_map[$key] = $badge;
 		}
 
@@ -47,8 +47,8 @@ class OBF_Badge {
 			$key = $badge['id'] . '_' . $badge['client_id'];
 
 			$data = [
-				'obf_client_id' => $badge['client_id'],
-				'obf_id' => $badge['id'],
+				'pbc_client_id' => $badge['client_id'],
+				'pbc_id' => $badge['id'],
 				'name' => $badge['name'],
 				'description' => $badge['description'],
 				'image' => $badge['image'],
@@ -78,7 +78,7 @@ class OBF_Badge {
 				}
 			} catch (Exception $e) {
 				// Log the error
-				OBF_Log::log_error('Failed to insert/update badge with ID ' . $badge['id'] . ': ' . $e->getMessage());
+				PBC_Log::log_error('Failed to insert/update badge with ID ' . $badge['id'] . ': ' . $e->getMessage());
 				throw $e; // Re-throw the exception to handle it in the REST controller
 			}
 		}
@@ -87,7 +87,7 @@ class OBF_Badge {
 		foreach ($existing_badge_map as $key => $badge) {
 			if (!isset($new_badge_map[$key])) {
 				// Delete associated triggers first
-				$trigger_table_name = $wpdb->prefix . 'obf_pws_triggers';
+				$trigger_table_name = $wpdb->prefix . 'pbc_triggers';
 				$wpdb->delete($trigger_table_name, ['badge_id' => $badge->id]);
 
 				// Now delete the badge itself

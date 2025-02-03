@@ -4,15 +4,15 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_User_Badges {
+class PBC_User_Badges {
 
 	private string $table_name_user_badges;
 	private string $table_name_badges;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name_user_badges = $wpdb->prefix . 'obf_pws_user_badges';
-		$this->table_name_badges = $wpdb->prefix . 'obf_pws_badges';
+		$this->table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
+		$this->table_name_badges = $wpdb->prefix . 'pbc_badges';
 	}
 
 	/**
@@ -32,7 +32,7 @@ class OBF_User_Badges {
 		", $user_id));
 
 		if ($badges === null) {
-			return new WP_Error('no_badges_found', __('No badges found for this user', 'obf'));
+			return new WP_Error('no_badges_found', __('No badges found for this user', 'pbc'));
 		}
 
 		return $badges;
