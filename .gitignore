@@ -11,6 +11,8 @@ node_modules
 build
 *.local
 
+/dist/pathwise-badge-connect/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
