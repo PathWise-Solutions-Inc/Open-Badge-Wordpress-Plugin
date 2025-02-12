@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class PBC_Scripts {
+class Pathwise_Badge_Connect_Scripts {
 
 	public function enqueue() {
 		$build_dir = plugin_dir_path(dirname(__FILE__)) . 'build/';
@@ -51,7 +51,7 @@ class PBC_Scripts {
 			}
 		}
 
-		$api_key = $this->pbc_local_api_key();
+		$api_key = $this->pathwise_badge_connect_local_api_key();
 
 		if ( wp_script_is( 'pbc-vue-main-js-1', 'enqueued' ) ) {
 			wp_localize_script( 'pbc-vue-main-js-1', 'pbcOptions', [
@@ -85,12 +85,12 @@ class PBC_Scripts {
 	 *
 	 * @return string The API key.
 	 */
-	public function pbc_local_api_key(): string {
-		$api_key = get_option( 'pbc_api_key' );
+	public function pathwise_badge_connect_local_api_key(): string {
+		$api_key = get_option( 'pathwise_badge_connect_api_key' );
 		if ( empty( $api_key ) ) {
 			// Generate a 32-character API key. Adjust parameters as needed.
 			$api_key = wp_generate_password( 32, false, false );
-			update_option( 'pbc_api_key', $api_key );
+			update_option( 'pathwise_badge_connect_api_key', $api_key );
 		}
 		return $api_key;
 	}

@@ -4,11 +4,11 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-if (!class_exists('PBC_Log')) {
-	require_once plugin_dir_path(__FILE__) . 'class-pbc-log.php';
+if (!class_exists( 'Pathwise_Badge_Connect_Log' )) {
+	require_once plugin_dir_path( __FILE__ ) . 'class-pathwise-badge-connect-log.php';
 }
 
-class PBC_REST_Controller {
+class Pathwise_Badge_Connect_REST_Controller {
 
 	public function register_routes(): void {
 
@@ -131,16 +131,16 @@ class PBC_REST_Controller {
 	 */
 	public function check_permissions(WP_REST_Request $request): bool {
 		$api_key_received = $request->get_header('pbc-api-key');
-		$api_get_local = get_option( 'pbc_api_key' );
+		$api_get_local = get_option( 'pathwise_badge_connect_api_key' );
 		$nonce = $request->get_header('X-WP-Nonce');
 
 		if ($api_key_received !== $api_get_local) {
-			new WP_Error('rest_forbidden', __('Invalid API key.'), ['status' => 403]);
+			new WP_Error('rest_forbidden', __('Invalid API key.', 'pathwise-badge-connect'), ['status' => 403]);
 			return false;
 		}
 
 		if (!wp_verify_nonce($nonce, 'wp_rest')) {
-			new WP_Error('rest_forbidden', __('Invalid nonce.'), ['status' => 403]);
+			new WP_Error('rest_forbidden', __('Invalid nonce.', 'pathwise-badge-connect'), ['status' => 403]);
 			return false;
 		}
 
@@ -154,15 +154,15 @@ class PBC_REST_Controller {
 	* @return WP_REST_Response
 	*/
 	public function get_connection_status(WP_REST_Request $request): WP_REST_Response {
-		$client_id = get_option('pbc_client_id');
-		$client_secret = get_option('pbc_client_secret');
+		$client_id = get_option('pathwise_badge_connect_client_id');
+		$client_secret = get_option('pathwise_badge_connect_client_secret');
 
 		if (empty($client_id) || empty($client_secret)) {
 			error_log('PBC Client ID or Secret is missing.');
 			return new WP_REST_Response(['connection_status' => 'Not Connected'], 200);
 		}
 
-		$api_client = new PBC_API_Client($client_id, $client_secret);
+		$api_client = new Pathwise_Badge_Connect_API_Client($client_id, $client_secret);
 		$status = $api_client->get_connection_status();
 
 		if ($status === 'PBC Error') {
@@ -179,7 +179,7 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function sync_badges(WP_REST_Request $request): WP_REST_Response {
-		$api_client = new PBC_API_Client(get_option('pbc_client_id'), get_option('pbc_client_secret'));
+		$api_client = new Pathwise_Badge_Connect_API_Client(get_option('pathwise_badge_connect_client_id'), get_option('pathwise_badge_connect_client_secret'));
 
 		// Fetch badges from the PBC API
 		$badges = $api_client->get_badges([
@@ -188,22 +188,22 @@ class PBC_REST_Controller {
 		]);
 
 		if (is_wp_error($badges)) {
-			PBC_Log::log_error('Failed to synchronize badges from Open Badge Factory: ' . $badges->get_error_message());
+			Pathwise_Badge_Connect_Log::log_error( 'Failed to synchronize badges from Open Badge Factory: ' . $badges->get_error_message());
 			return new WP_REST_Response(['message' => $badges->get_error_message()], 500);
 		}
 
 		try {
-			$badge_model = new PBC_Badge();
+			$badge_model = new Pathwise_Badge_Connect_Badge();
 			$synced_badges = $badge_model->sync_from_api($badges);
 
 			$last_sync_time = gmdate('Y-m-d H:i:s');
-			update_option('pbc_last_sync', $last_sync_time);
+			update_option('pathwise_badge_connect_last_sync', $last_sync_time);
 
-			PBC_Log::log_success("Badges successfully synchronized from Open Badge Factory. Total badges synchronized: " . count($synced_badges));
+			Pathwise_Badge_Connect_Log::log_success( "Badges successfully synchronized from Open Badge Factory. Total badges synchronized: " . count($synced_badges));
 
 			return new WP_REST_Response(['success' => true, 'last_sync' => $last_sync_time, 'badges' => $synced_badges], 200);
 		} catch (Exception $e) {
-			PBC_Log::log_error('Error during badge synchronization: ' . $e->getMessage());
+			Pathwise_Badge_Connect_Log::log_error( 'Error during badge synchronization: ' . $e->getMessage());
 			return new WP_REST_Response(['message' => 'Error during badge synchronization: ' . $e->getMessage()], 500);
 		}
 	}
@@ -215,7 +215,7 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_last_sync(WP_REST_Request $request): WP_REST_Response {
-		$last_sync = get_option('pbc_last_sync', null);
+		$last_sync = get_option('pathwise_badge_connect_last_sync', null);
 		return new WP_REST_Response(['last_sync' => $last_sync], 200);
 	}
 
@@ -226,7 +226,7 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_badges(WP_REST_Request $request): WP_REST_Response {
-		$badge_model = new PBC_Badge();
+		$badge_model = new Pathwise_Badge_Connect_Badge();
 		$badges = $badge_model->get_badges();
 		return new WP_REST_Response(['badges' => $badges], 200);
 	}
@@ -238,12 +238,12 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_triggers(WP_REST_Request $request): WP_REST_Response {
-		$trigger_model = new PBC_Trigger();
+		$trigger_model = new Pathwise_Badge_Connect_Trigger();
 		$triggers = $trigger_model->get_triggers();
 
 		if (is_wp_error($triggers)) {
 			$error_message = $triggers->get_error_message();
-			PBC_Log::log_error('Error fetching triggers: ' . $error_message);
+			Pathwise_Badge_Connect_Log::log_error( 'Error fetching triggers: ' . $error_message);
 			return new WP_REST_Response(['error' => $error_message], 500);
 		}
 
@@ -257,7 +257,7 @@ class PBC_REST_Controller {
 	 */
 	public function get_trigger(WP_REST_Request $request): WP_REST_Response {
 		$trigger_id = intval($request->get_param('id'));
-		$trigger_model = new PBC_Trigger();
+		$trigger_model = new Pathwise_Badge_Connect_Trigger();
 		$trigger = $trigger_model->get_trigger($trigger_id);
 
 		if (is_wp_error($trigger)) {
@@ -281,7 +281,7 @@ class PBC_REST_Controller {
 		$trigger_type = sanitize_text_field($params['trigger_type']);
 		$object = sanitize_text_field($params['object']);
 
-		$trigger_model = new PBC_Trigger();
+		$trigger_model = new Pathwise_Badge_Connect_Trigger();
 
 		if ($id) {
 			$updated_trigger = $trigger_model->update_trigger($id, $badge_id, $extension, $trigger_type, $object);
@@ -306,7 +306,7 @@ class PBC_REST_Controller {
 	 */
 	public function delete_trigger(WP_REST_Request $request): WP_REST_Response {
 		$trigger_id = intval($request->get_param('id'));
-		$trigger_model = new PBC_Trigger();
+		$trigger_model = new Pathwise_Badge_Connect_Trigger();
 		$deleted = $trigger_model->delete_trigger($trigger_id);
 
 		if (is_wp_error($deleted)) {
@@ -347,7 +347,7 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_logs(WP_REST_Request $request): WP_REST_Response {
-		$log = new PBC_Log();
+		$log = new Pathwise_Badge_Connect_Log();
 		$logs = $log->get_logs($request);
 
 		// Ensure logs is an array
@@ -368,8 +368,8 @@ class PBC_REST_Controller {
 	 */
 	public function get_settings(WP_REST_Request $request): WP_REST_Response {
 		$settings = [
-			'client_id' => get_option('pbc_client_id'),
-			'client_secret' => get_option('pbc_client_secret'),
+			'client_id' => get_option('pathwise_badge_connect_client_id'),
+			'client_secret' => get_option('pathwise_badge_connect_client_secret'),
 		];
 
 		return new WP_REST_Response(['settings' => $settings], 200);
@@ -386,12 +386,12 @@ class PBC_REST_Controller {
 		$client_id = sanitize_text_field($params['client_id']);
 		$client_secret = sanitize_text_field($params['client_secret']);
 
-		update_option('pbc_client_id', $client_id);
-		update_option('pbc_client_secret', $client_secret);
+		update_option('pathwise_badge_connect_client_id', $client_id);
+		update_option('pathwise_badge_connect_client_secret', $client_secret);
 
 		// Invalidate old token if credentials change
-		delete_option('pbc_access_token');
-		delete_option('pbc_token_expires_in');
+		delete_option('pathwise_badge_connect_access_token');
+		delete_option('pathwise_badge_connect_token_expires_in');
 
 		return new WP_REST_Response(['success' => true], 200);
 	}
@@ -406,7 +406,7 @@ class PBC_REST_Controller {
 		global $wpdb;
 
 		$notices = $wpdb->get_results("
-		SELECT * FROM {$wpdb->prefix}pbc_notices
+		SELECT * FROM {$wpdb->prefix}pathwise_badge_connect_notices
 		WHERE status = 1
 		ORDER BY created_date DESC
 	");
@@ -432,7 +432,7 @@ class PBC_REST_Controller {
 		$action = isset($params['action']) ? esc_url_raw($params['action']) : null;
 
 		$wpdb->insert(
-			"{$wpdb->prefix}pbc_notices",
+			"{$wpdb->prefix}pathwise_badge_connect_notices",
 			[
 				'status' => $status,
 				'type' => $type,
@@ -461,7 +461,7 @@ class PBC_REST_Controller {
 
 		$id = (int)$request->get_param('id');
 
-		$deleted = $wpdb->delete("{$wpdb->prefix}pbc_notices", ['id' => $id]);
+		$deleted = $wpdb->delete("{$wpdb->prefix}pathwise_badge_connect_notices", ['id' => $id]);
 
 		if (!$deleted) {
 			return new WP_REST_Response(['success' => false, 'message' => 'Failed to delete notice.'], 500);
@@ -502,7 +502,7 @@ class PBC_REST_Controller {
 	public function export_logs_to_csv(WP_REST_Request $request) {
 		error_log('Export logs route hit'); // Debugging line
 
-		$log = new PBC_Log();
+		$log = new Pathwise_Badge_Connect_Log();
 		$csv_content = $log->generate_csv();
 
 		if ( empty( $csv_content ) ) {
@@ -532,7 +532,7 @@ class PBC_REST_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function clear_logs(WP_REST_Request $request) {
-		$log = new PBC_Log();
+		$log = new Pathwise_Badge_Connect_Log();
 		$cleared = $log->clear_all_logs();
 
 		if (!$cleared) {

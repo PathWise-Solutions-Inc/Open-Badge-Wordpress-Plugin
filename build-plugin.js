@@ -31,7 +31,7 @@ const coreFilesAndFolders = [
     'includes',
     'public',
     'src/samples',
-    'class-pbc-plugin.php',
+    'class-pathwise-badge-connect-plugin.php',
     'pathwise-badge-connect.php',
     'README.md',
 ];

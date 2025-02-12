@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class PBC_Plugin {
+class Pathwise_Badge_Connect_Plugin {
 
 	public function __construct() {
 		$this->load_dependencies();
@@ -12,19 +12,19 @@ class PBC_Plugin {
         $this->define_shortcodes();
 
 		// Initialize the trigger executor
-		new PBC_Trigger_Executor();
+		new Pathwise_Badge_Connect_Trigger_Executor();
 	}
 
 	private function load_dependencies(): void {
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-admin-menu.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-scripts.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-api-client.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-badge.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-trigger.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-rest-controller.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-notice-handler.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-trigger-executor.php';
-		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pbc-user-badges.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-admin-menu.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-scripts.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-api-client.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-badge.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-trigger.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-rest-controller.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-notice-handler.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-trigger-executor.php';
+		require_once plugin_dir_path( __FILE__ ) . 'includes/class-pathwise-badge-connect-user-badges.php';
 	}
 
 	private function initialize_hooks(): void {
@@ -41,26 +41,26 @@ class PBC_Plugin {
 	}
 
 	public function register_menu(): void {
-		$pbc_admin_menu = new PBC_Admin_Menu();
+		$pbc_admin_menu = new Pathwise_Badge_Connect_Admin_Menu();
 		$pbc_admin_menu->register_menu();
 	}
 
 	public function enqueue_scripts(): void {
-		$pbc_scripts = new PBC_Scripts();
+		$pbc_scripts = new Pathwise_Badge_Connect_Scripts();
 		$pbc_scripts->enqueue();
 	}
 
 	public function register_rest_routes(): void {
-		$pbc_rest_controller = new PBC_REST_Controller();
+		$pbc_rest_controller = new Pathwise_Badge_Connect_REST_Controller();
 		$pbc_rest_controller->register_routes();
 	}
 
 	public function check_admin_notices(): void {
-		$notice_handler = new PBC_Notice_Handler();
+		$notice_handler = new Pathwise_Badge_Connect_Notice_Handler();
 
-		$client_id         = get_option( 'pbc_client_id' );
-		$client_secret     = get_option( 'pbc_client_secret' );
-		$api_client        = new PBC_API_Client( $client_id, $client_secret );
+		$client_id         = get_option( 'pathwise_badge_connect_client_id' );
+		$client_secret     = get_option( 'pathwise_badge_connect_client_secret' );
+		$api_client        = new Pathwise_Badge_Connect_API_Client( $client_id, $client_secret );
 		$connection_status = $api_client->get_connection_status();
 
 		// Check if Client ID is filled
@@ -86,19 +86,19 @@ class PBC_Plugin {
 	}
 
 	public function activate(): void {
-		$installed_version = get_option( 'pbc_db_version' );
+		$installed_version = get_option( 'pathwise_badge_connect_db_version' );
 
 		// Run schema creation only if the version is missing or outdated.
-		if ( $installed_version !== PBC_PLUGIN_VERSION ) {
+		if ( $installed_version !== PATHWISE_BADGE_CONNECT_PLUGIN_VERSION ) {
 			$this->create_tables();
-			update_option( 'pbc_db_version', PBC_PLUGIN_VERSION );
+			update_option( 'pathwise_badge_connect_db_version', PATHWISE_BADGE_CONNECT_PLUGIN_VERSION );
 		}
 		$this->create_tables();
-		$this->pbc_add_badge_capabilities();
-		$this->pbc_local_api_key();
+		$this->pathwise_badge_connect_add_badge_capabilities();
+		$this->pathwise_badge_connect_local_api_key();
 	}
 
-	function pbc_add_badge_capabilities(): void {
+	function pathwise_badge_connect_add_badge_capabilities(): void {
 		// Define roles that should have the 'read_badges' capability
 		$roles = ['administrator', 'editor', 'author', 'subscriber'];
 
@@ -113,7 +113,7 @@ class PBC_Plugin {
 	public function register_pbc_block(): void {
 		if ( !WP_Block_Type_Registry::get_instance()->is_registered( 'pbc/badges-block' ) ) {
 			register_block_type( 'pbc/badges-block', [
-				'render_callback' => [ $this, 'render_pbc_badges_block' ],
+				'render_callback' => [ $this, 'render_pathwise_badge_connect_badges_block' ],
 				'attributes'      => [
 					'layout'         => [
 						'type'    => 'string',
@@ -136,7 +136,7 @@ class PBC_Plugin {
 		}
 	}
 
-	public function render_pbc_badges_block( $attributes ): string {
+	public function render_pathwise_badge_connect_badges_block( $attributes ): string {
 		// Get the badges for the logged-in user
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
@@ -252,7 +252,7 @@ class PBC_Plugin {
 		// Parse the provided attributes against the defaults
 		$attributes = shortcode_atts( $defaults, $atts );
 
-		// Convert attributes to match the format expected by render_pbc_badges_block
+		// Convert attributes to match the format expected by render_pathwise_badge_connect_badges_block
 		$attributes = [
 			'layout'          => $attributes['layout'],
 			'columns'         => (int) $attributes['columns'],
@@ -263,14 +263,14 @@ class PBC_Plugin {
 		];
 
 		// Call the existing render function with the mapped attributes
-		return $this->render_pbc_badges_block( $attributes );
+		return $this->render_pathwise_badge_connect_badges_block( $attributes );
 	}
 
 	// Helper function to get badges from the database
 	private function get_user_badges_from_database( $user_id ): array {
 		global $wpdb;
-		$table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
-		$table_name_badges = $wpdb->prefix . 'pbc_badges';
+		$table_name_user_badges = $wpdb->prefix . 'pathwise_badge_connect_user_badges';
+		$table_name_badges = $wpdb->prefix . 'pathwise_badge_connect_badges';
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
@@ -288,11 +288,11 @@ class PBC_Plugin {
 		global $wpdb;
 		$charset_collate = $wpdb->get_charset_collate();
 
-		// Create pbc_badges table
-		$table_name_badges = $wpdb->prefix . 'pbc_badges';
+		// Create pathwise_badge_connect_badges table
+		$table_name_badges = $wpdb->prefix . 'pathwise_badge_connect_badges';
 		$sql_badges = "CREATE TABLE $table_name_badges (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        pbc_client_id VARCHAR(255) NOT NULL,
+        pathwise_badge_connect_client_id VARCHAR(255) NOT NULL,
         pbc_id VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
@@ -305,8 +305,8 @@ class PBC_Plugin {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
-		// Create pbc_triggers table
-		$table_name_triggers = $wpdb->prefix . 'pbc_triggers';
+		// Create pathwise_badge_connect_triggers table
+		$table_name_triggers = $wpdb->prefix . 'pathwise_badge_connect_triggers';
 		$sql_triggers = "CREATE TABLE $table_name_triggers (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         badge_id BIGINT(20) UNSIGNED NOT NULL,
@@ -319,8 +319,8 @@ class PBC_Plugin {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
-		// Create pbc_logs table
-		$table_name_logs = $wpdb->prefix . 'pbc_logs';
+		// Create pathwise_badge_connect_logs table
+		$table_name_logs = $wpdb->prefix . 'pathwise_badge_connect_logs';
 		$sql_logs = "CREATE TABLE $table_name_logs (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         trigger_id BIGINT(20) UNSIGNED NULL,
@@ -333,8 +333,8 @@ class PBC_Plugin {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
-		// Create pbc_notices table
-		$table_name_notices = $wpdb->prefix . 'pbc_notices';
+		// Create pathwise_badge_connect_notices table
+		$table_name_notices = $wpdb->prefix . 'pathwise_badge_connect_notices';
 		$sql_notices = "CREATE TABLE $table_name_notices (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         slug VARCHAR(100) NOT NULL UNIQUE,
@@ -348,8 +348,8 @@ class PBC_Plugin {
         PRIMARY KEY (id)
     ) $charset_collate;";
 
-		// Create pbc_user_badges table
-		$table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
+		// Create pathwise_badge_connect_user_badges table
+		$table_name_user_badges = $wpdb->prefix . 'pathwise_badge_connect_user_badges';
 		$sql_user_badges = "CREATE TABLE $table_name_user_badges (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
@@ -392,12 +392,12 @@ class PBC_Plugin {
 	 *
 	 * @return string The API key.
 	 */
-	public function pbc_local_api_key(): string {
-		$api_key = get_option( 'pbc_api_key' );
+	public function pathwise_badge_connect_local_api_key(): string {
+		$api_key = get_option( 'pathwise_badge_connect_api_key' );
 		if ( empty( $api_key ) ) {
 			// Generate a 32-character API key. Adjust parameters as needed.
 			$api_key = wp_generate_password( 32, false, false );
-			update_option( 'pbc_api_key', $api_key );
+			update_option( 'pathwise_badge_connect_api_key', $api_key );
 		}
 		return $api_key;
 	}

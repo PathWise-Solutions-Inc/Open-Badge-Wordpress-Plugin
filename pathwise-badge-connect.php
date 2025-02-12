@@ -15,21 +15,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
-// Define a constant for the plugin version.
-if ( ! defined( 'PBC_PLUGIN_VERSION' ) ) {
-	define( 'PBC_PLUGIN_VERSION', '0.3.2' );
+// Define constants
+if ( ! defined( 'PATHWISE_BADGE_CONNECT_PLUGIN_VERSION' ) ) {
+	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_VERSION', '0.3.2' );
+}
+if ( ! defined( 'PATHWISE_BADGE_CONNECT_PLUGIN_DIR' ) ) {
+	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+}
+if ( ! defined( 'PATH_BADGE_CONNECT_PLUGIN_URL' ) ) {
+	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 }
 
-// Optionally, you could define other constants (like a plugin path or URL) for reuse.
-if ( ! defined( 'PBC_PLUGIN_DIR' ) ) {
-	define( 'PBC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-}
-if ( ! defined( 'PBC_PLUGIN_URL' ) ) {
-	define( 'PBC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-}
-
-require_once PBC_PLUGIN_DIR . 'class-pbc-plugin.php';
-$pbc_plugin = new PBC_Plugin();
+require_once PATHWISE_BADGE_CONNECT_PLUGIN_DIR . 'class-pathwise-badge-connect-plugin.php';
+$pathwise_badge_connect_plugin = new Pathwise_Badge_Connect_Plugin();
 
 // Register activation hook.
-register_activation_hook( __FILE__, [ $pbc_plugin, 'activate' ] );
+register_activation_hook( __FILE__, [ $pathwise_badge_connect_plugin, 'activate' ] );

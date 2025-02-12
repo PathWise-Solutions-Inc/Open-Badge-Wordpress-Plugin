@@ -4,13 +4,13 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class PBC_Log {
+class Pathwise_Badge_Connect_Log {
 
 	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'pbc_logs';
+		$this->table_name = $wpdb->prefix . 'pathwise_badge_connect_logs';
 	}
 
 	// General log creation method
@@ -69,9 +69,9 @@ class PBC_Log {
             COALESCE(posts.ID, '') AS post_id,
             COALESCE(users.display_name, '') AS user_name, 
             COALESCE(users.ID, 0) AS user_id
-        FROM {$wpdb->prefix}pbc_logs logs
-        LEFT JOIN {$wpdb->prefix}pbc_triggers triggers ON logs.trigger_id = triggers.id
-        LEFT JOIN {$wpdb->prefix}pbc_badges badges ON triggers.badge_id = badges.id
+        FROM {$wpdb->prefix}pathwise_badge_connect_logs logs
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_triggers triggers ON logs.trigger_id = triggers.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_badges badges ON triggers.badge_id = badges.id
         LEFT JOIN {$wpdb->posts} posts ON logs.post_id = posts.ID
         LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID
         ORDER BY logs.created_at DESC
@@ -95,8 +95,8 @@ class PBC_Log {
             COALESCE(users.display_name, '') AS user_name, 
             COALESCE(users.ID, 0) AS user_id
         FROM {$this->table_name} logs
-        LEFT JOIN {$wpdb->prefix}pbc_triggers triggers ON logs.trigger_id = triggers.id
-        LEFT JOIN {$wpdb->prefix}pbc_badges badges ON triggers.badge_id = badges.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_triggers triggers ON logs.trigger_id = triggers.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_badges badges ON triggers.badge_id = badges.id
         LEFT JOIN {$wpdb->posts} posts ON logs.post_id = posts.ID
         LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID
         ORDER BY logs.created_at DESC

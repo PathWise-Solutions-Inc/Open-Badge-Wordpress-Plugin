@@ -11,8 +11,8 @@ class PBC_User_Badges {
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name_user_badges = $wpdb->prefix . 'pbc_user_badges';
-		$this->table_name_badges = $wpdb->prefix . 'pbc_badges';
+		$this->table_name_user_badges = $wpdb->prefix . 'pathwise_badge_connect_user_badges';
+		$this->table_name_badges = $wpdb->prefix . 'pathwise_badge_connect_badges';
 	}
 
 	/**

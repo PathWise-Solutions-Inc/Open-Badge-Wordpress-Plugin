@@ -1,7 +1,7 @@
 <?php
-// includes/class-pbc-api-client.php
+// includes/class-pathwise-badge-connect-api-client.php
 
-class PBC_API_Client {
+class Pathwise_Badge_Connect_API_Client {
 
 	private string $client_id;
 	private string $client_secret;
@@ -23,8 +23,8 @@ class PBC_API_Client {
 	}
 
 	public function get_access_token() {
-		$stored_token = get_option('pbc_access_token');
-		$token_expires_in = get_option('pbc_token_expires_in');
+		$stored_token = get_option('pathwise_badge_connect_access_token');
+		$token_expires_in = get_option('pathwise_badge_connect_token_expires_in');
 		$current_time = time();
 
 		// Return existing token if valid
@@ -57,14 +57,14 @@ class PBC_API_Client {
 			$this->access_token = $data['access_token'];
 			$adjusted_expiry_time = $current_time + (int)$data['expires_in'] - 86400;
 			$this->token_expires_in = $adjusted_expiry_time;
-			update_option('pbc_access_token', $this->access_token);
-			update_option('pbc_token_expires_in', $this->token_expires_in);
+			update_option('pathwise_badge_connect_access_token', $this->access_token);
+			update_option('pathwise_badge_connect_token_expires_in', $this->token_expires_in);
 
 			return $this->access_token;
 		}
 
 		// Log full response if access token was not found
-		return new WP_Error('pbc_api_error', __('Failed to retrieve access token', 'pathwise-badge-connect'));
+		return new WP_Error('pathwise_badge_connect_api_error', __('Failed to retrieve access token', 'pathwise-badge-connect'));
 	}
 
 	/**
@@ -83,7 +83,7 @@ class PBC_API_Client {
 			$this->get_access_token();
 			if (empty($this->access_token)) {
 				error_log(__('Access token is missing or invalid', 'pathwise-badge-connect'));
-				return new WP_Error('pbc_api_error', __('Access token is missing or invalid', 'pathwise-badge-connect'));
+				return new WP_Error('pathwise_badge_connect_api_error', __('Access token is missing or invalid', 'pathwise-badge-connect'));
 			}
 		}
 
@@ -123,7 +123,7 @@ class PBC_API_Client {
 		// Check if response code indicates failure
 		if ($response_code < 200 || $response_code >= 300) {
 			error_log('PBC API Request Error - HTTP Status: ' . $response_code . ' Body: ' . $response_body);
-			return new WP_Error('pbc_api_error', __('Failed to communicate with PBC API', 'pathwise-badge-connect'), ['status_code' => $response_code, 'body' => $response_body]);
+			return new WP_Error('pathwise_badge_connect_api_error', __('Failed to communicate with PBC API', 'pathwise-badge-connect'), ['status_code' => $response_code, 'body' => $response_body]);
 		}
 
 		// Return the full response to allow further checks
@@ -144,7 +144,7 @@ class PBC_API_Client {
 		global $wpdb;
 
 		// Fetch the PBC ID for the badge
-		$table_name = $wpdb->prefix . 'pbc_badges';
+		$table_name = $wpdb->prefix . 'pathwise_badge_connect_badges';
 		$badge = $wpdb->get_row($wpdb->prepare("SELECT pbc_id FROM $table_name WHERE id = %d", $badge_id));
 
 		if (!$badge || empty($badge->pbc_id)) {
@@ -173,7 +173,7 @@ class PBC_API_Client {
 		}
 
 		// If not a success response, return an error with the response body
-		return new WP_Error('pbc_api_error', __('Failed to issue badge', 'pathwise-badge-connect'), ['response' => wp_remote_retrieve_body($response)]);
+		return new WP_Error('pathwise_badge_connect_api_error', __('Failed to issue badge', 'pathwise-badge-connect'), ['response' => wp_remote_retrieve_body($response)]);
 	}
 
 
@@ -201,7 +201,7 @@ class PBC_API_Client {
 
 		// Log mismatched client_id for further debugging
 		error_log('PBC API Ping Error - Mismatched Client ID: ' . $response_body);
-		return new WP_Error('pbc_api_error', __('Ping failed: Mismatched client ID', 'pathwise-badge-connect'));
+		return new WP_Error('pathwise_badge_connect_api_error', __('Ping failed: Mismatched client ID', 'pathwise-badge-connect'));
 	}
 
 	/**
@@ -272,8 +272,8 @@ class PBC_API_Client {
 
 		// Handle JSON decoding errors
 		if (json_last_error() !== JSON_ERROR_NONE) {
-			error_log('PBC API Error - JSON Decoding: ' . json_last_error_msg());
-			return new WP_Error('pbc_api_error', __('Failed to decode badge data', 'pathwise-badge-connect'));
+			error_log('Pathwise Badge Connect API Error - JSON Decoding: ' . json_last_error_msg());
+			return new WP_Error('pathwise_badge_connect_api_error', __('Failed to decode badge data', 'pathwise-badge-connect'));
 		}
 
 		return $badge_data;
@@ -300,7 +300,7 @@ class PBC_API_Client {
 		// Ping the PBC API
 		$ping_response = $this->ping();
 		if (is_wp_error($ping_response)) {
-			return 'PBC Error';
+			return 'OpenBadge Error';
 		}
 
 		// Return success if the ping response is 'Connected'
@@ -308,7 +308,7 @@ class PBC_API_Client {
 			return 'Connected';
 		}
 
-		return 'PBC Error';
+		return 'Error';
 	}
 
 }

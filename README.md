@@ -133,7 +133,7 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
         - Added logging using `PBC_Log` when triggers are created, updated, or deleted, enhancing transparency and auditability.
         - Ensured that `trigger_id` is included in log messages for better traceability.
     - **Badge Issuance Tracking:**
-        - Added functionality to store issued badges in the `pbc_user_badges` table after successful issuance via the API, enabling better tracking of user badges.
+        - Added functionality to store issued badges in the `pathwise_badge_connect_user_badges` table after successful issuance via the API, enabling better tracking of user badges.
 
 - **Code Refactoring and Cleanup:**
     - **Type Corrections:**
@@ -186,11 +186,11 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
 
 **Database Structure:**
 - Created several new database tables to manage badges, triggers, logs, and user-badge relationships:
-    - `pbc_badges`: Stores badge information synced from the PBC API.
-    - `pbc_triggers`: Stores trigger information that links actions to badge issuance.
-    - `pbc_logs`: Stores logs of activity related to badge issuance and trigger executions.
-    - `pbc_user_badges`: Stores which users have received which badges.
-    - `pbc_notices`: Stores notices to display in the admin interface.
+    - `pathwise_badge_connect_badges`: Stores badge information synced from the PBC API.
+    - `pathwise_badge_connect_triggers`: Stores trigger information that links actions to badge issuance.
+    - `pathwise_badge_connect_logs`: Stores logs of activity related to badge issuance and trigger executions.
+    - `pathwise_badge_connect_user_badges`: Stores which users have received which badges.
+    - `pathwise_badge_connect_notices`: Stores notices to display in the admin interface.
 
 **REST API Endpoints:**
 - Added extensive custom REST API endpoints to interact with badges, triggers, settings, logs, and notices:

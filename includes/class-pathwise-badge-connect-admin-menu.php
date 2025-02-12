@@ -1,11 +1,11 @@
 <?php
-// includes/class-pbc-admin-menu.php
+// includes/class-pathwise-badge-connect-admin-menu.php
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-class PBC_Admin_Menu {
+class Pathwise_Badge_Connect_Admin_Menu {
 	public function register_menu() {
 		add_menu_page(
 			'Badges',
