@@ -109,7 +109,7 @@ class Pathwise_Badge_Connect_Log {
 
 		// Start output buffering for CSV generation
 		ob_start();
-		$output = fopen('php://output', 'w');
+		$output = fopen('php://output', 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 
 		// Write CSV headers
 		fputcsv($output, [
@@ -137,7 +137,7 @@ class Pathwise_Badge_Connect_Log {
 			]);
 		}
 
-		fclose($output);
+		fclose($output); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		// Get the CSV content
 		$csv_content = ob_get_clean();

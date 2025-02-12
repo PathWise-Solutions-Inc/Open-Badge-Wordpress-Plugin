@@ -511,13 +511,16 @@ class Pathwise_Badge_Connect_REST_Controller {
 		}
 
 		// Generate a sanitized filename with the current date.
-		$filename = sanitize_file_name( 'pathwise-badge-connect-logs-' . date( 'Y-m-d' ) . '.csv' );
+		$filename = sanitize_file_name( 'pathwise-badge-connect-logs-' . current_time( 'Y-m-d' ) . '.csv' );
 
 		// Set headers for CSV download.
 		header( 'Content-Type: text/csv; charset=utf-8' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
 
 		// Output the CSV content.
+		// The CSV content is not HTML, so HTML escaping would corrupt it.
+		// We trust that generate_csv() returns safe and properly sanitized data.
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $csv_content;
 
 		// Prevent WordPress from appending additional content.

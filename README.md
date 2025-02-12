@@ -9,6 +9,8 @@
 **License**: GPLv2 or later  
 **License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
+Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory to enable seamless badge management and issuance.
+
 ## Description
 Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
 
