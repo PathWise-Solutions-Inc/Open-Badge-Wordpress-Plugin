@@ -4,13 +4,13 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Log {
+class Pathwise_Badge_Connect_Log {
 
 	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'obf_pws_logs';
+		$this->table_name = $wpdb->prefix . 'pathwise_badge_connect_logs';
 	}
 
 	// General log creation method
@@ -69,9 +69,9 @@ class OBF_Log {
             COALESCE(posts.ID, '') AS post_id,
             COALESCE(users.display_name, '') AS user_name, 
             COALESCE(users.ID, 0) AS user_id
-        FROM {$wpdb->prefix}obf_pws_logs logs
-        LEFT JOIN {$wpdb->prefix}obf_pws_triggers triggers ON logs.trigger_id = triggers.id
-        LEFT JOIN {$wpdb->prefix}obf_pws_badges badges ON triggers.badge_id = badges.id
+        FROM {$wpdb->prefix}pathwise_badge_connect_logs logs
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_triggers triggers ON logs.trigger_id = triggers.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_badges badges ON triggers.badge_id = badges.id
         LEFT JOIN {$wpdb->posts} posts ON logs.post_id = posts.ID
         LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID
         ORDER BY logs.created_at DESC
@@ -95,8 +95,8 @@ class OBF_Log {
             COALESCE(users.display_name, '') AS user_name, 
             COALESCE(users.ID, 0) AS user_id
         FROM {$this->table_name} logs
-        LEFT JOIN {$wpdb->prefix}obf_pws_triggers triggers ON logs.trigger_id = triggers.id
-        LEFT JOIN {$wpdb->prefix}obf_pws_badges badges ON triggers.badge_id = badges.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_triggers triggers ON logs.trigger_id = triggers.id
+        LEFT JOIN {$wpdb->prefix}pathwise_badge_connect_badges badges ON triggers.badge_id = badges.id
         LEFT JOIN {$wpdb->posts} posts ON logs.post_id = posts.ID
         LEFT JOIN {$wpdb->users} users ON logs.user_id = users.ID
         ORDER BY logs.created_at DESC
@@ -109,7 +109,7 @@ class OBF_Log {
 
 		// Start output buffering for CSV generation
 		ob_start();
-		$output = fopen('php://output', 'w');
+		$output = fopen('php://output', 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
 
 		// Write CSV headers
 		fputcsv($output, [
@@ -137,7 +137,7 @@ class OBF_Log {
 			]);
 		}
 
-		fclose($output);
+		fclose($output); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		// Get the CSV content
 		$csv_content = ob_get_clean();

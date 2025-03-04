@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Scripts {
+class Pathwise_Badge_Connect_Scripts {
 
 	public function enqueue() {
 		$build_dir = plugin_dir_path(dirname(__FILE__)) . 'build/';
@@ -16,13 +16,13 @@ class OBF_Scripts {
 			$current_screen = get_current_screen();
 
 			// Check if we're on the specific admin page for the plugin
-			if (isset($current_screen->base) && $current_screen->base === 'toplevel_page_obf-pws-badges') {
+			if (isset($current_screen->base) && $current_screen->base === 'toplevel_page_pathwise-badge-connect') {
 				$js_files = glob($build_dir . 'assets/main*.js');
 
 				$count = 1;
 				foreach ($js_files as $js_file) {
 					$js_file_url = $build_url . 'assets/' . basename($js_file);
-					wp_enqueue_script('obf-vue-main-js-' . $count, $js_file_url, [
+					wp_enqueue_script('pbc-vue-main-js-' . $count, $js_file_url, [
 						'wp-blocks',
 						'wp-i18n',
 						'wp-element',
@@ -38,7 +38,7 @@ class OBF_Scripts {
 				$count = 1;
 				foreach ($js_files as $js_file) {
 					$js_file_url = $build_url . 'assets/' . basename($js_file);
-					wp_enqueue_script('obf-vue-badge-blocks-js-' . $count, $js_file_url, [
+					wp_enqueue_script('pbc-vue-badge-blocks-js-' . $count, $js_file_url, [
 						'wp-blocks',
 						'wp-i18n',
 						'wp-element',
@@ -51,20 +51,22 @@ class OBF_Scripts {
 			}
 		}
 
-		// Localize the main Vue script if it was enqueued
-		if (wp_script_is('obf-vue-main-js-1', 'enqueued')) {
-			wp_localize_script('obf-vue-main-js-1', 'obfOptions', [
-				'ajaxurl' => admin_url('admin-ajax.php'),
-				'nonce'   => wp_create_nonce('wp_rest'),
-			]);
+		$api_key = $this->pathwise_badge_connect_local_api_key();
+
+		if ( wp_script_is( 'pbc-vue-main-js-1', 'enqueued' ) ) {
+			wp_localize_script( 'pbc-vue-main-js-1', 'pbcOptions', [
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'pbcApiKey' => $api_key
+			] );
 		}
 
-		// Localize the badge block script if it was enqueued
-		if (wp_script_is('obf-vue-badge-blocks-js-1', 'enqueued')) {
-			wp_localize_script('obf-vue-badge-blocks-js-1', 'obfOptions', [
-				'ajaxurl' => admin_url('admin-ajax.php'),
-				'nonce'   => wp_create_nonce('wp_rest'),
-			]);
+		if ( wp_script_is( 'pbc-vue-badge-blocks-js-1', 'enqueued' ) ) {
+			wp_localize_script( 'pbc-vue-badge-blocks-js-1', 'pbcOptions', [
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'pbc-api-key' => $api_key
+			] );
 		}
 
 		$css_files = glob($build_dir . 'assets/*.css');
@@ -73,8 +75,23 @@ class OBF_Scripts {
 		$count = 1;
 		foreach ($css_files as $css_file) {
 			$css_file_url = $build_url . 'assets/' . basename($css_file);
-			wp_enqueue_style('obf-vue-css' . $count, $css_file_url, [], filemtime($css_file)); // Use file modification time for versioning
+			wp_enqueue_style('pbc-vue-css' . $count, $css_file_url, [], filemtime($css_file)); // Use file modification time for versioning
 			$count++;
 		}
+	}
+
+	/**
+	 * Retrieve the local API key, or generate one if it doesn't exist.
+	 *
+	 * @return string The API key.
+	 */
+	public function pathwise_badge_connect_local_api_key(): string {
+		$api_key = get_option( 'pathwise_badge_connect_api_key' );
+		if ( empty( $api_key ) ) {
+			// Generate a 32-character API key. Adjust parameters as needed.
+			$api_key = wp_generate_password( 32, false, false );
+			update_option( 'pathwise_badge_connect_api_key', $api_key );
+		}
+		return $api_key;
 	}
 }
