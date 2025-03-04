@@ -1,18 +1,16 @@
-# Pathwise Badge Connect
+# Pathwise Badge Connect by Pathwise Solutions
 
-**Contributors**: Pathwise Solutions Inc., cvanderlinden  
+**Contributors**: cvanderlinden, lxdintegral, pathwise  
 **Tags**: open-badge, badges, LearnDash  
 **Requires at least**: 5.8  
-**Tested up to**: 6.7.1  
+**Tested up to**: 6.7  
 **Requires PHP**: 7.4  
-**Stable tag**: 0.3.2 
+**Stable tag**: 0.3.2  
 **License**: GPLv2 or later  
 **License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
-Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory to enable seamless badge management and issuance.
-
 ## Description
-Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
+Pathwise Badge Connect by Pathwise Solutions integrates WordPress and LearnDash with Open Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
 
 ## Features Include:
 - **Badge Management**: Sync badges with Open Badge Factory and display them dynamically on your WordPress site.
@@ -22,7 +20,7 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
 
 ## Installation
 
-1. Download the plugin ZIP file (`open-badge-factory-pws.zip`).
+1. Download the plugin ZIP file (`pathwise-badge-connect-pws.zip`).
 2. Log in to your WordPress admin dashboard.
 3. Navigate to **Plugins > Add New > Upload Plugin**.
 4. Select the ZIP file and click **Install Now**.
@@ -93,7 +91,7 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
     - Badges are dynamically loaded on the front-end, ensuring users always see their latest badge achievements.
 
 - **REST API Enhancements:**
-    - Added the `/wp-json/pathwise-badge-connect/v1/user-badges` endpoint to retrieve a logged-in user’s badges.
+    - Added the `/wp-json/obf-pws/v1/user-badges` endpoint to retrieve a logged-in user’s badges.
     - Permissions check added to ensure only authorized users can access their badges.
 
 **Enhancements:**
@@ -132,10 +130,10 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
     - **Post Title Association:**
         - Fixed an issue where fetching triggers lost associated post titles after refactoring, ensuring that triggers correctly include related post information.
     - **Logging Enhancements:**
-        - Added logging using `PBC_Log` when triggers are created, updated, or deleted, enhancing transparency and auditability.
+        - Added logging using `OBF_Log` when triggers are created, updated, or deleted, enhancing transparency and auditability.
         - Ensured that `trigger_id` is included in log messages for better traceability.
     - **Badge Issuance Tracking:**
-        - Added functionality to store issued badges in the `pathwise_badge_connect_user_badges` table after successful issuance via the API, enabling better tracking of user badges.
+        - Added functionality to store issued badges in the `obf_pws_user_badges` table after successful issuance via the API, enabling better tracking of user badges.
 
 - **Code Refactoring and Cleanup:**
     - **Type Corrections:**
@@ -166,7 +164,7 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
     - Each trigger has customizable fields: badge, extension, trigger action, and object (related post).
 
 - **Badge Synchronization:**
-    - Ability to sync badges with the Open Badge Factory (PBC) API.
+    - Ability to sync badges with the Open Badge Factory (OBF) API.
     - Displays synced badges in a searchable and filterable interface.
     - Each badge displays key information such as name, description, image, category, available languages, and expiration details.
     - Added functionality to trigger the synchronization process manually.
@@ -188,29 +186,29 @@ Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factor
 
 **Database Structure:**
 - Created several new database tables to manage badges, triggers, logs, and user-badge relationships:
-    - `pathwise_badge_connect_badges`: Stores badge information synced from the PBC API.
-    - `pathwise_badge_connect_triggers`: Stores trigger information that links actions to badge issuance.
-    - `pathwise_badge_connect_logs`: Stores logs of activity related to badge issuance and trigger executions.
-    - `pathwise_badge_connect_user_badges`: Stores which users have received which badges.
-    - `pathwise_badge_connect_notices`: Stores notices to display in the admin interface.
+    - `obf_pws_badges`: Stores badge information synced from the OBF API.
+    - `obf_pws_triggers`: Stores trigger information that links actions to badge issuance.
+    - `obf_pws_logs`: Stores logs of activity related to badge issuance and trigger executions.
+    - `obf_pws_user_badges`: Stores which users have received which badges.
+    - `obf_pws_notices`: Stores notices to display in the admin interface.
 
 **REST API Endpoints:**
 - Added extensive custom REST API endpoints to interact with badges, triggers, settings, logs, and notices:
-    - `/wp-json/pathwise-badge-connect/v1/connection-status`: Get the connection status with the Open Badge Factory API.
-    - `/wp-json/pathwise-badge-connect/v1/settings`: Retrieve the current settings.
-    - `/wp-json/pathwise-badge-connect/v1/settings`: Save settings (POST).
-    - `/wp-json/pathwise-badge-connect/v1/sync`: Synchronize badges with the Open Badge Factory (POST).
-    - `/wp-json/pathwise-badge-connect/v1/last-sync`: Get the last sync time.
-    - `/wp-json/pathwise-badge-connect/v1/badges`: Retrieve all badges.
-    - `/wp-json/pathwise-badge-connect/v1/triggers`: Get all triggers.
-    - `/wp-json/pathwise-badge-connect/v1/triggers/(?P<id>\d+)`: Get a single trigger by ID.
-    - `/wp-json/pathwise-badge-connect/v1/triggers`: Save or update a trigger (POST).
-    - `/wp-json/pathwise-badge-connect/v1/triggers/(?P<id>\d+)`: Delete a trigger (DELETE).
-    - `/wp-json/pathwise-badge-connect/v1/posts-by-type`: Get all posts by a specified post type.
-    - `/wp-json/pathwise-badge-connect/v1/logs`: Retrieve activity logs.
-    - `/wp-json/pathwise-badge-connect/v1/notices`: Get all active notices.
-    - `/wp-json/pathwise-badge-connect/v1/notices`: Create a new notice (POST).
-    - `/wp-json/pathwise-badge-connect/v1/notices/(?P<id>\d+)`: Delete a notice (DELETE).
+    - `/wp-json/obf-pws/v1/connection-status`: Get the connection status with the Open Badge Factory API.
+    - `/wp-json/obf-pws/v1/settings`: Retrieve the current settings.
+    - `/wp-json/obf-pws/v1/settings`: Save settings (POST).
+    - `/wp-json/obf-pws/v1/sync`: Synchronize badges with the Open Badge Factory (POST).
+    - `/wp-json/obf-pws/v1/last-sync`: Get the last sync time.
+    - `/wp-json/obf-pws/v1/badges`: Retrieve all badges.
+    - `/wp-json/obf-pws/v1/triggers`: Get all triggers.
+    - `/wp-json/obf-pws/v1/triggers/(?P<id>\d+)`: Get a single trigger by ID.
+    - `/wp-json/obf-pws/v1/triggers`: Save or update a trigger (POST).
+    - `/wp-json/obf-pws/v1/triggers/(?P<id>\d+)`: Delete a trigger (DELETE).
+    - `/wp-json/obf-pws/v1/posts-by-type`: Get all posts by a specified post type.
+    - `/wp-json/obf-pws/v1/logs`: Retrieve activity logs.
+    - `/wp-json/obf-pws/v1/notices`: Get all active notices.
+    - `/wp-json/obf-pws/v1/notices`: Create a new notice (POST).
+    - `/wp-json/obf-pws/v1/notices/(?P<id>\d+)`: Delete a notice (DELETE).
 
 
 **Known Issues:**

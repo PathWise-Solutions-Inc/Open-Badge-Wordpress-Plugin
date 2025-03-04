@@ -5,7 +5,7 @@
     "type": "Notice",
     "subject": "New Feature Available",
     "description": "Check out the new feature we've added to the platform.",
-    "action": "/wp-admin/admin.php?page=pathwise-badge-connect-feature",
+    "action": "/wp-admin/admin.php?page=obf-pws-feature",
     "created_date": "2023-12-01T12:00:00Z",
     "completed_date": null
   },
@@ -25,7 +25,7 @@
     "type": "Error",
     "subject": "Sync Failed",
     "description": "There was an error while syncing your badges.",
-    "action": "/wp-admin/admin.php?page=pathwise-badge-connect-sync",
+    "action": "/wp-admin/admin.php?page=obf-pws-sync",
     "created_date": "2023-12-03T15:30:00Z",
     "completed_date": null
   },
@@ -35,7 +35,7 @@
     "type": "Warning",
     "subject": "Account Expiring",
     "description": "Your account is set to expire soon. Please renew your subscription.",
-    "action": "/wp-admin/admin.php?page=pathwise-badge-connect-renew",
+    "action": "/wp-admin/admin.php?page=obf-pws-renew",
     "created_date": "2023-12-04T09:45:00Z",
     "completed_date": null
   }

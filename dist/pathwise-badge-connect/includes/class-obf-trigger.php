@@ -3,13 +3,13 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class Pathwise_Badge_Connect_Trigger {
+class OBF_Trigger {
 
 	private string $table_name;
 
 	public function __construct() {
 		global $wpdb;
-		$this->table_name = $wpdb->prefix . 'pathwise_badge_connect_triggers';
+		$this->table_name = $wpdb->prefix . 'obf_pws_triggers';
 	}
 
 	/**
@@ -32,7 +32,7 @@ class Pathwise_Badge_Connect_Trigger {
 		);
 
 		if (!$trigger) {
-			return new WP_Error('trigger_not_found', __('Trigger not found', 'pathwise-badge-connect'));
+			return new WP_Error('trigger_not_found', __('Trigger not found', 'obf'));
 		}
 
 		return $trigger;
@@ -63,11 +63,11 @@ class Pathwise_Badge_Connect_Trigger {
 		);
 
 		if ($updated === false) {
-			Pathwise_Badge_Connect_Log::log_error("Failed to update trigger ID {$id}", $id);
-			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'pathwise-badge-connect'));
+			OBF_Log::log_error("Failed to update trigger ID {$id}", $id);
+			return new WP_Error('trigger_update_failed', __('Failed to update trigger', 'obf'));
 		}
 
-		Pathwise_Badge_Connect_Log::log_success("Trigger ID {$id} successfully updated.", $id);
+		OBF_Log::log_success("Trigger ID {$id} successfully updated.", $id);
 		return $this->get_trigger($id);
 	}
 
@@ -95,12 +95,12 @@ class Pathwise_Badge_Connect_Trigger {
 		);
 
 		if ($inserted === false) {
-			Pathwise_Badge_Connect_Log::log_error("Failed to create new trigger.");
-			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'pathwise-badge-connect'));
+			OBF_Log::log_error("Failed to create new trigger.");
+			return new WP_Error('trigger_create_failed', __('Failed to create trigger', 'obf'));
 		}
 
 		$trigger_id = $wpdb->insert_id;
-		Pathwise_Badge_Connect_Log::log_success("Trigger ID {$trigger_id} successfully created.", $trigger_id);
+		OBF_Log::log_success("Trigger ID {$trigger_id} successfully created.", $trigger_id);
 		return $this->get_trigger($trigger_id);
 	}
 
@@ -116,11 +116,11 @@ class Pathwise_Badge_Connect_Trigger {
 		$deleted = $wpdb->delete($this->table_name, ['id' => $trigger_id]);
 
 		if ($deleted === false) {
-			Pathwise_Badge_Connect_Log::log_error("Failed to delete trigger ID {$trigger_id}", $trigger_id);
-			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'pathwise-badge-connect'));
+			OBF_Log::log_error("Failed to delete trigger ID {$trigger_id}", $trigger_id);
+			return new WP_Error('trigger_delete_failed', __('Failed to delete trigger', 'obf'));
 		}
 
-		Pathwise_Badge_Connect_Log::log_success("Trigger ID {$trigger_id} successfully deleted.", $trigger_id);
+		OBF_Log::log_success("Trigger ID {$trigger_id} successfully deleted.", $trigger_id);
 		return true;
 	}
 
@@ -145,8 +145,8 @@ class Pathwise_Badge_Connect_Trigger {
 			return $triggers ?: [];
 		} catch (Exception $e) {
 			// Log the error
-			Pathwise_Badge_Connect_Log::log_error( 'Error fetching triggers: ' . $e->getMessage());
-			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'pathwise-badge-connect'));
+			OBF_Log::log_error('Error fetching triggers: ' . $e->getMessage());
+			return new WP_Error('trigger_fetch_failed', __('Failed to fetch triggers', 'obf'));
 		}
 	}
 }

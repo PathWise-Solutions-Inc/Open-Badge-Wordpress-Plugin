@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import archiver from 'archiver';
 import fs from 'fs';
 
-const pluginName = 'open-badge-factory-pws';
+const pluginName = 'pathwise-badge-connect';
 const distFolder = resolve('dist');
 const buildFolder = resolve('build');
 const outputFilePath = resolve(distFolder, `${pluginName}.zip`);
