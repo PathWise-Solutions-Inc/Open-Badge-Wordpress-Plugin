@@ -1,8 +1,19 @@
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+
 export default defineConfig({
   plugins: [vue()],
   build: {
-    minify: false,
-    sourcemap: true,
+    sourcemap: true,              // Enable sourcemaps for debugging
+    minify: 'terser',             // Use Terser as the minifier
+    terserOptions: {
+      compress: false,            // Disable compression for readable output
+      mangle: true,               // Mangle variable names to avoid conflicts
+      format: {
+        beautify: true,           // Beautify the output (i.e. unminified)
+      },
+    },
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/main.js'),

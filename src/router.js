@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Badges from './components/Badges.vue';
 import Triggers from './components/Triggers.vue';
 import Settings from './components/Settings.vue';
@@ -13,7 +13,7 @@ const routes = [
 ];
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes,
 });
 
