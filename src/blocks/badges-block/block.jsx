@@ -7,10 +7,10 @@ if (typeof wp.blockEditor !== 'undefined') {
     const { PanelBody, ToggleControl, SelectControl, RangeControl, Placeholder, Spinner, TextControl } = wp.components;
 
     // Check if the block is already registered
-    if (!getBlockType('obf/badges-block')) {
+    if (!getBlockType('pbc/badges-block')) {
         // Register the block
-        registerBlockType('obf/badges-block', {
-            title: __('User Badges', 'obf'),
+        registerBlockType('pbc/badges-block', {
+            title: __('User Badges', 'pathwise-badge-connect'),
             icon: 'awards',
             category: 'widgets',
             attributes: {
@@ -27,7 +27,7 @@ if (typeof wp.blockEditor !== 'undefined') {
                 const [loading, setLoading] = useState(true);
 
                 useEffect(() => {
-                    apiFetch({ path: '/obf-pws/v1/user-badges' })
+                    apiFetch({ path: '/pathwise-badge-connect/v1/user-badges' })
                         .then((data) => {
                             if (data && data.badges) {
                                 setBadges(data.badges);
@@ -50,9 +50,9 @@ if (typeof wp.blockEditor !== 'undefined') {
                 return (
                     <>
                         <InspectorControls>
-                            <PanelBody title={__('Display Settings', 'obf')}>
+                            <PanelBody title={__('Display Settings', 'pathwise-badge-connect')}>
                                 <SelectControl
-                                    label={__('Layout', 'obf')}
+                                    label={__('Layout', 'pathwise-badge-connect')}
                                     value={layout}
                                     options={[
                                         { label: 'Grid', value: 'grid' },
@@ -62,18 +62,18 @@ if (typeof wp.blockEditor !== 'undefined') {
                                     onChange={(newLayout) => setAttributes({ layout: newLayout })}
                                 />
                                 <ToggleControl
-                                    label={__('Show Badge Name', 'obf')}
+                                    label={__('Show Badge Name', 'pathwise-badge-connect')}
                                     checked={showBadgeName}
                                     onChange={(value) => setAttributes({ showBadgeName: value })}
                                 />
                                 <ToggleControl
-                                    label={__('Show Badge Image', 'obf')}
+                                    label={__('Show Badge Image', 'pathwise-badge-connect')}
                                     checked={showBadgeImage}
                                     onChange={(value) => setAttributes({ showBadgeImage: value })}
                                 />
                                 {(layout === 'grid' || layout === 'table') && (
                                     <RangeControl
-                                        label={__('Columns', 'obf')}
+                                        label={__('Columns', 'pathwise-badge-connect')}
                                         value={columns}
                                         onChange={(newColumns) => setAttributes({ columns: newColumns })}
                                         min={1}
@@ -83,13 +83,13 @@ if (typeof wp.blockEditor !== 'undefined') {
                                 {showBadgeImage && (
                                     <>
                                         <TextControl
-                                            label={__('Image Width', 'obf')}
+                                            label={__('Image Width', 'pathwise-badge-connect')}
                                             value={imageWidth}
                                             onChange={(value) => setAttributes({ imageWidth: value })}
                                             help={__('Set the width of the badge image (e.g., 100%, 200px).')}
                                         />
                                         <TextControl
-                                            label={__('Image Max Width', 'obf')}
+                                            label={__('Image Max Width', 'pathwise-badge-connect')}
                                             value={imageMaxWidth}
                                             onChange={(value) => setAttributes({ imageMaxWidth: value })}
                                             help={__('Set the maximum width of the badge image (e.g., 450px).')}
@@ -99,7 +99,7 @@ if (typeof wp.blockEditor !== 'undefined') {
                             </PanelBody>
                         </InspectorControls>
                         {layout === 'grid' && (
-                            <div className={`obf-badges-block grid`} style={{ '--columns': columns }}>
+                            <div className={`pbc-badges-block grid`} style={{ '--columns': columns }}>
                                 {badges && badges.length > 0 ? (
                                     badges.map((badge) => (
                                         <div className="badge-item" key={badge.id}>
@@ -114,12 +114,12 @@ if (typeof wp.blockEditor !== 'undefined') {
                                         </div>
                                     ))
                                 ) : (
-                                    <p>{__('No badges available.', 'obf')}</p>
+                                    <p>{__('No badges available.', 'pathwise-badge-connect')}</p>
                                 )}
                             </div>
                         )}
                         {layout === 'table' && (
-                            <table className="obf-badges-block table" style={{'--columns': columns}}>
+                            <table className="pbc-badges-block table" style={{'--columns': columns}}>
                                 <tbody>
                                 {badges && badges.length > 0 ? (
                                     badges.map((badge, index) => {
@@ -146,14 +146,14 @@ if (typeof wp.blockEditor !== 'undefined') {
                                     })
                                 ) : (
                                     <tr>
-                                        <td>{__('No badges available.', 'obf')}</td>
+                                        <td>{__('No badges available.', 'pathwise-badge-connect')}</td>
                                     </tr>
                                 )}
                                 </tbody>
                             </table>
                         )}
                         {layout === 'list' && (
-                            <ul className="obf-badges-block list">
+                            <ul className="pbc-badges-block list">
                                 {badges && badges.length > 0 ? (
                                     badges.map((badge, index) => (
                                         <li className="badge-item" key={index}>
@@ -168,7 +168,7 @@ if (typeof wp.blockEditor !== 'undefined') {
                                         </li>
                                     ))
                                 ) : (
-                                    <li>{__('No badges available.', 'obf')}</li>
+                                    <li>{__('No badges available.', 'pathwise-badge-connect')}</li>
                                 )}
                             </ul>
                         )}

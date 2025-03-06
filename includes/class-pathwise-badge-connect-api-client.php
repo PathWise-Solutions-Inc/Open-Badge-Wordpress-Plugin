@@ -1,7 +1,7 @@
 <?php
-// includes/class-obf-api-client.php
+// includes/class-pathwise-badge-connect-api-client.php
 
-class OBF_API_Client {
+class Pathwise_Badge_Connect_API_Client {
 
 	private string $client_id;
 	private string $client_secret;
@@ -23,8 +23,8 @@ class OBF_API_Client {
 	}
 
 	public function get_access_token() {
-		$stored_token = get_option('obf_access_token');
-		$token_expires_in = get_option('obf_token_expires_in');
+		$stored_token = get_option('pathwise_badge_connect_access_token');
+		$token_expires_in = get_option('pathwise_badge_connect_token_expires_in');
 		$current_time = time();
 
 		// Return existing token if valid
@@ -45,7 +45,7 @@ class OBF_API_Client {
 
 		// Log error if response is an error
 		if (is_wp_error($response)) {
-			error_log('OBF API Token Request Error: ' . $response->get_error_message());
+			error_log('PBC API Token Request Error: ' . $response->get_error_message());
 			return $response;
 		}
 
@@ -57,18 +57,18 @@ class OBF_API_Client {
 			$this->access_token = $data['access_token'];
 			$adjusted_expiry_time = $current_time + (int)$data['expires_in'] - 86400;
 			$this->token_expires_in = $adjusted_expiry_time;
-			update_option('obf_access_token', $this->access_token);
-			update_option('obf_token_expires_in', $this->token_expires_in);
+			update_option('pathwise_badge_connect_access_token', $this->access_token);
+			update_option('pathwise_badge_connect_token_expires_in', $this->token_expires_in);
 
 			return $this->access_token;
 		}
 
 		// Log full response if access token was not found
-		return new WP_Error('obf_api_error', __('Failed to retrieve access token', 'obf'));
+		return new WP_Error('pathwise_badge_connect_api_error', __('Failed to retrieve access token', 'pathwise-badge-connect'));
 	}
 
 	/**
-	 * Make an HTTP request to the OBF API.
+	 * Make an HTTP request to the PBC API.
 	 *
 	 * @param string $method HTTP method ('GET', 'POST', etc.).
 	 * @param string $endpoint API endpoint (relative to base URL).
@@ -82,8 +82,8 @@ class OBF_API_Client {
 		if (empty($this->access_token)) {
 			$this->get_access_token();
 			if (empty($this->access_token)) {
-				error_log(__('Access token is missing or invalid', 'obf'));
-				return new WP_Error('obf_api_error', __('Access token is missing or invalid', 'obf'));
+				error_log(__('Access token is missing or invalid', 'pathwise-badge-connect'));
+				return new WP_Error('pathwise_badge_connect_api_error', __('Access token is missing or invalid', 'pathwise-badge-connect'));
 			}
 		}
 
@@ -112,7 +112,7 @@ class OBF_API_Client {
 
 		// Check for request error
 		if (is_wp_error($response)) {
-			error_log('OBF API Request Error: ' . $response->get_error_message());
+			error_log('PBC API Request Error: ' . $response->get_error_message());
 			return $response;
 		}
 
@@ -122,8 +122,8 @@ class OBF_API_Client {
 
 		// Check if response code indicates failure
 		if ($response_code < 200 || $response_code >= 300) {
-			error_log('OBF API Request Error - HTTP Status: ' . $response_code . ' Body: ' . $response_body);
-			return new WP_Error('obf_api_error', __('Failed to communicate with OBF API', 'obf'), ['status_code' => $response_code, 'body' => $response_body]);
+			error_log('PBC API Request Error - HTTP Status: ' . $response_code . ' Body: ' . $response_body);
+			return new WP_Error('pathwise_badge_connect_api_error', __('Failed to communicate with PBC API', 'pathwise-badge-connect'), ['status_code' => $response_code, 'body' => $response_body]);
 		}
 
 		// Return the full response to allow further checks
@@ -143,16 +143,16 @@ class OBF_API_Client {
 	public function issue_badge(string $badge_id, array $recipients, int $expires = null, array $additional_params = []) {
 		global $wpdb;
 
-		// Fetch the OBF ID for the badge
-		$table_name = $wpdb->prefix . 'obf_pws_badges';
-		$badge = $wpdb->get_row($wpdb->prepare("SELECT obf_id FROM $table_name WHERE id = %d", $badge_id));
+		// Fetch the PBC ID for the badge
+		$table_name = $wpdb->prefix . 'pathwise_badge_connect_badges';
+		$badge = $wpdb->get_row($wpdb->prepare("SELECT pbc_id FROM $table_name WHERE id = %d", $badge_id));
 
-		if (!$badge || empty($badge->obf_id)) {
-			error_log('The OBF ID was not found for the given badge ID. Badge obf_id: ' . $badge_id);
-			return new WP_Error('obf_id_not_found', __('The OBF ID was not found for the given badge ID.', 'obf'));
+		if (!$badge || empty($badge->pbc_id)) {
+			error_log('The PBC ID was not found for the given badge ID. Badge pbc_id: ' . $badge_id);
+			return new WP_Error('pbc_id_not_found', __('The PBC ID was not found for the given badge ID.', 'pathwise-badge-connect'));
 		}
 
-		$endpoint = 'badge/' . $this->client_id . '/' . $badge->obf_id;
+		$endpoint = 'badge/' . $this->client_id . '/' . $badge->pbc_id;
 		$body = array_merge(['recipient' => $recipients], $additional_params);
 		if ($expires) {
 			$body['expires'] = $expires;
@@ -173,12 +173,12 @@ class OBF_API_Client {
 		}
 
 		// If not a success response, return an error with the response body
-		return new WP_Error('obf_api_error', __('Failed to issue badge', 'obf'), ['response' => wp_remote_retrieve_body($response)]);
+		return new WP_Error('pathwise_badge_connect_api_error', __('Failed to issue badge', 'pathwise-badge-connect'), ['response' => wp_remote_retrieve_body($response)]);
 	}
 
 
 	/**
-	 * Ping the OBF API to verify connection status.
+	 * Ping the PBC API to verify connection status.
 	 *
 	 * @return WP_Error|string 'Connected' on success or WP_Error on failure.
 	 */
@@ -187,7 +187,7 @@ class OBF_API_Client {
 
 		// Check if the request resulted in an error
 		if (is_wp_error($response)) {
-			error_log('OBF API Ping Error: ' . $response->get_error_message());
+			error_log('PBC API Ping Error: ' . $response->get_error_message());
 			return $response;
 		}
 
@@ -200,8 +200,8 @@ class OBF_API_Client {
 		}
 
 		// Log mismatched client_id for further debugging
-		error_log('OBF API Ping Error - Mismatched Client ID: ' . $response_body);
-		return new WP_Error('obf_api_error', __('Ping failed: Mismatched client ID', 'obf'));
+		error_log('PBC API Ping Error - Mismatched Client ID: ' . $response_body);
+		return new WP_Error('pathwise_badge_connect_api_error', __('Ping failed: Mismatched client ID', 'pathwise-badge-connect'));
 	}
 
 	/**
@@ -244,7 +244,7 @@ class OBF_API_Client {
 				$data[] = $decoded;
 			} else {
 				error_log('JSON Decode Error: ' . json_last_error_msg() . ' for line: ' . $line);
-				return new WP_Error('json_decode_error', __('Failed to decode JSON response', 'obf'));
+				return new WP_Error('json_decode_error', __('Failed to decode JSON response', 'pathwise-badge-connect'));
 			}
 		}
 
@@ -254,7 +254,7 @@ class OBF_API_Client {
 	/**
 	 * Get a single badge by its ID.
 	 *
-	 * @param string $badge_id The badge's OBF ID.
+	 * @param string $badge_id The badge's PBC ID.
 	 *
 	 * @return WP_Error|array Badge data or WP_Error on failure.
 	 */
@@ -272,8 +272,8 @@ class OBF_API_Client {
 
 		// Handle JSON decoding errors
 		if (json_last_error() !== JSON_ERROR_NONE) {
-			error_log('OBF API Error - JSON Decoding: ' . json_last_error_msg());
-			return new WP_Error('obf_api_error', __('Failed to decode badge data', 'obf'));
+			error_log('Pathwise Badge Connect API Error - JSON Decoding: ' . json_last_error_msg());
+			return new WP_Error('pathwise_badge_connect_api_error', __('Failed to decode badge data', 'pathwise-badge-connect'));
 		}
 
 		return $badge_data;
@@ -281,7 +281,7 @@ class OBF_API_Client {
 
 
 	/**
-	 * Check the connection status with the OBF API.
+	 * Check the connection status with the PBC API.
 	 *
 	 * @return string Connection status message.
 	 */
@@ -297,10 +297,10 @@ class OBF_API_Client {
 			return 'Credential Error';
 		}
 
-		// Ping the OBF API
+		// Ping the PBC API
 		$ping_response = $this->ping();
 		if (is_wp_error($ping_response)) {
-			return 'OBF Error';
+			return 'OpenBadge Error';
 		}
 
 		// Return success if the ping response is 'Connected'
@@ -308,7 +308,7 @@ class OBF_API_Client {
 			return 'Connected';
 		}
 
-		return 'OBF Error';
+		return 'Error';
 	}
 
 }

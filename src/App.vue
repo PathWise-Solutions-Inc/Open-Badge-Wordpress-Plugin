@@ -1,7 +1,7 @@
 <!-- src/App.vue -->
 
 <template>
-  <div id="obf-pws-container">
+  <div id="pathwise-badge-connect-container">
     <app-header></app-header>
     <main>
       <router-view></router-view>

@@ -31,8 +31,8 @@ const coreFilesAndFolders = [
     'includes',
     'public',
     'src/samples',
-    'class-obf-plugin.php',
-    'open-badge-factory-pws.php',
+    'class-pathwise-badge-connect-plugin.php',
+    'pathwise-badge-connect.php',
     'README.md',
 ];
 coreFilesAndFolders.forEach((item) => {

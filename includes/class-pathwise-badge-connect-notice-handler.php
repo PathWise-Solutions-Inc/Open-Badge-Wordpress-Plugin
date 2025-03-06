@@ -4,21 +4,21 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class OBF_Notice_Handler {
+class Pathwise_Badge_Connect_Notice_Handler {
 
 	public function create_or_update_notice($slug, $type, $subject, $description, $action = null) {
 		global $wpdb;
 
 		// Check if the notice already exists by slug
 		$existing_notice = $wpdb->get_var($wpdb->prepare(
-			"SELECT id FROM {$wpdb->prefix}obf_pws_notices WHERE slug = %s",
+			"SELECT id FROM {$wpdb->prefix}pathwise_badge_connect_notices WHERE slug = %s",
 			$slug
 		));
 
 		if ($existing_notice) {
 			// Update the existing notice
 			$wpdb->update(
-				"{$wpdb->prefix}obf_pws_notices",
+				"{$wpdb->prefix}pathwise_badge_connect_notices",
 				[
 					'status' => true,
 					'type' => $type,
@@ -32,7 +32,7 @@ class OBF_Notice_Handler {
 		} else {
 			// Create a new notice
 			$wpdb->insert(
-				"{$wpdb->prefix}obf_pws_notices",
+				"{$wpdb->prefix}pathwise_badge_connect_notices",
 				[
 					'slug' => $slug,
 					'status' => true,
@@ -51,14 +51,14 @@ class OBF_Notice_Handler {
 
 		// Find the notice by slug
 		$notice_id = $wpdb->get_var($wpdb->prepare(
-			"SELECT id FROM {$wpdb->prefix}obf_pws_notices WHERE slug = %s",
+			"SELECT id FROM {$wpdb->prefix}pathwise_badge_connect_notices WHERE slug = %s",
 			$slug
 		));
 
 		if ($notice_id) {
 			// Remove or deactivate the notice
 			$wpdb->update(
-				"{$wpdb->prefix}obf_pws_notices",
+				"{$wpdb->prefix}pathwise_badge_connect_notices",
 				['status' => false, 'completed_date' => current_time('mysql')],
 				['id' => $notice_id]
 			);

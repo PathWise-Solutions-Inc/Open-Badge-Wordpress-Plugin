@@ -177,11 +177,11 @@ export default {
     },
     async fetchSettings() {
       try {
-        const response = await fetch('/wp-json/obf-pws/v1/settings', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings', {
           method: 'GET',
           headers: {
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-            'X-WP-Nonce': obfOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
+            'X-WP-Nonce': pbcOptions.nonce,
           },
         });
 
@@ -201,11 +201,11 @@ export default {
     },
     async fetchLastSync() {
       try {
-        const response = await fetch('/wp-json/obf-pws/v1/last-sync', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/last-sync', {
           method: 'GET',
           headers: {
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-            'X-WP-Nonce': obfOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
+            'X-WP-Nonce': pbcOptions.nonce,
           },
         });
 
@@ -262,12 +262,12 @@ export default {
       await this.$store.dispatch('fetchConnectionStatus');
     },
     async saveToWordPressOption(options) {
-      const response = await fetch('/wp-json/obf-pws/v1/settings', {
+      const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-          'X-WP-Nonce': obfOptions.nonce,
+          'pbc-api-key': pbcOptions.pbcApiKey,
+          'X-WP-Nonce': pbcOptions.nonce,
         },
         body: JSON.stringify(options),
       });
@@ -287,12 +287,12 @@ export default {
       this.syncIcon = 'spinner';
 
       try {
-        const response = await fetch('/wp-json/obf-pws/v1/sync', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/sync', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-            'X-WP-Nonce': obfOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
+            'X-WP-Nonce': pbcOptions.nonce,
           },
         });
 

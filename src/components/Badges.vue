@@ -76,12 +76,12 @@ export default {
     async syncBadges() {
       this.syncing = true;
       try {
-        const response = await fetch('/wp-json/obf-pws/v1/sync', {
+        const response = await fetch('/wp-json/pathwise-badge-connect/v1/sync', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-            'X-WP-Nonce': obfOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
+            'X-WP-Nonce': pbcOptions.nonce,
           },
         });
 

@@ -252,11 +252,11 @@ export default {
     },
     async fetchPostsByType(postType) {
       try {
-        const response = await fetch(`/wp-json/obf-pws/v1/posts-by-type?post_type=${postType}`, {
+        const response = await fetch(`/wp-json/pathwise-badge-connect/v1/posts-by-type?post_type=${postType}`, {
           method: 'GET',
           headers: {
-            'obf-api-key': '9b255783-6844-42f6-be24-3ac62c178859',
-            'X-WP-Nonce': obfOptions.nonce,
+            'pbc-api-key': pbcOptions.pbcApiKey,
+            'X-WP-Nonce': pbcOptions.nonce,
           },
         });
 
