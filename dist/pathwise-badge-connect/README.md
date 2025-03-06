@@ -28,6 +28,20 @@ Pathwise Badge Connect by Pathwise Solutions integrates WordPress and LearnDash 
 6. Navigate to the plugin settings page to configure the Open Badge Factory API credentials (client ID and secret).
 7. Use the synchronization button to import badges from Open Badge Factory.
 
+
+## External Services
+
+This plugin integrates with the Open Badge Factory API, which is used to create, issue, and manage digital badges. 
+The API enables our plugin to manage your Open Badge Factory badges directly in WordPress.
+
+Data Transmission:
+When you issue or update a badge, the plugin sends relevant badge details (such as badge title, description, criteria) over an HTTPS connection along with recipient information (email address) to the Open Badge Factory API. This transmission occurs only during badge operations, ensuring that data is exchanged exclusively for the purpose of managing your digital badges.
+
+Service Provider Information:
+This API serivce is provided by Open Badge Factory. For further details on their policies, please review the following:
+- Terms of Service: https://openbadgefactory.com/terms-of-service  
+- Privacy Policy: https://openbadgefactory.com/privacy-policy
+
 ## Release Notes
 
 ### v0.3.0 - Shortcode Integration and Enhanced Badge Display Options (2024-09-19)
