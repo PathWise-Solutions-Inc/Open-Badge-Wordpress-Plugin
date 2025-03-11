@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { copyFileSync, mkdirSync, rmSync } from 'fs';
+import { mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import archiver from 'archiver';
 import fs from 'fs';
@@ -44,10 +44,13 @@ coreFilesAndFolders.forEach((item) => {
     }
 });
 
-// Create a zip archive
+// Create a zip archive with zip64 disabled
 console.log('Creating zip archive...');
 const output = fs.createWriteStream(outputFilePath);
-const archive = archiver('zip', { zlib: { level: 9 } });
+const archive = archiver('zip', {
+    zlib: { level: 9 },
+    forceZip64: false  // Disable Zip64 format
+});
 
 output.on('close', () => {
     console.log(`Plugin built and zipped successfully: ${outputFilePath}`);
@@ -58,5 +61,12 @@ archive.on('error', (err) => {
 });
 
 archive.pipe(output);
-archive.directory(pluginFolder, false);
+
+// Archive the plugin folder while filtering out .DS_Store files.
+// Return false for .DS_Store to skip, and return the entry for everything else.
+archive.directory(pluginFolder, false, (entry) => {
+    if (entry.name === '.DS_Store') return false;
+    return entry;
+});
+
 archive.finalize();
