@@ -5,13 +5,12 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [vue()],
   build: {
-    sourcemap: true,              // Enable sourcemaps for debugging
-    minify: 'terser',             // Use Terser as the minifier
+    sourcemap: true,
+    minify: 'terser',
     terserOptions: {
-      compress: false,            // Disable compression for readable output
-      mangle: true,               // Mangle variable names to avoid conflicts
       format: {
-        beautify: true,           // Beautify the output (i.e. unminified)
+        beautify: true,
+        comments: false,
       },
     },
     rollupOptions: {
@@ -34,7 +33,7 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/wp-content/plugins/open-badge-factory-pws/': {
+      '/wp-content/plugins/pathwise-badge-connect/': {
         target: 'http://localhost:8000',
         changeOrigin: true,
       },

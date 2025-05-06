@@ -3,34 +3,34 @@
     <ul>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect' } }"
-            :class="{ active: isActiveTab('') }"
+            :to="{ query: { tab: 'badges' } }"
+        :class="{ active: isActiveTab('badges') }"
         >
-          Badges
+        Badges
         </router-link>
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'triggers' } }"
-            :class="{ active: isActiveTab('triggers') }"
+            :to="{ query: { tab: 'triggers' } }"
+        :class="{ active: isActiveTab('triggers') }"
         >
-          Triggers
+        Triggers
         </router-link>
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'settings' } }"
-            :class="{ active: isActiveTab('settings') }"
+            :to="{ query: { tab: 'settings' } }"
+        :class="{ active: isActiveTab('settings') }"
         >
-          Settings
+        Settings
         </router-link>
       </li>
       <li>
         <router-link
-            :to="{ path: '/wp-admin/admin.php', query: { page: 'pathwise-badge-connect', tab: 'log' } }"
-            :class="{ active: isActiveTab('log') }"
+            :to="{ query: { tab: 'log' } }"
+        :class="{ active: isActiveTab('log') }"
         >
-          Log
+        Log
         </router-link>
       </li>
     </ul>
@@ -42,7 +42,8 @@ export default {
   name: 'NavBar',
   computed: {
     currentTab() {
-      return this.$route.query.tab || '';
+      // Reads the 'tab' query parameter from the Vue router's current route state (from the hash)
+      return this.$route.query.tab || 'badges'; // Default to 'badges'
     },
   },
   methods: {

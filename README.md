@@ -28,6 +28,64 @@ Pathwise Badge Connect by Pathwise Solutions integrates WordPress and LearnDash 
 6. Navigate to the plugin settings page to configure the Open Badge Factory API credentials (client ID and secret).
 7. Use the synchronization button to import badges from Open Badge Factory.
 
+## Development
+
+This plugin includes front-end assets managed with Node.js and npm (or yarn/pnpm). To contribute to the front-end code or build the assets yourself, you need to set up the development environment.
+
+### Prerequisites
+
+Before you start, ensure you have Node.js and npm (Node Package Manager) installed on your system.
+
+* **Node.js & npm:** You can download the latest version from the official [Node.js website](https://nodejs.org/). Installation typically includes npm.
+    * *Recommendation:* Consider using a Node Version Manager like [nvm](https://github.com/nvm-sh/nvm) (macOS/Linux) or [nvm-windows](https://github.com/coreybutler/nvm-windows) to easily manage multiple Node.js versions.
+
+  You can verify your installations by running these commands in your terminal:
+
+    ```bash
+    node --version
+    npm --version
+    ```
+
+### Setup
+
+1.  Navigate to the plugin's root directory in your terminal. This is the directory containing the `package.json` file.
+
+    ```bash
+    cd path/to/your/wordpress/wp-content/plugins/pathwise-badge-connect
+    ```
+
+2.  Install the project dependencies by running the following command:
+
+    ```bash
+    npm install
+    ```
+
+    This command reads the `package.json` file and downloads all necessary packages into the `node_modules` directory.
+
+### Compiling Assets
+
+The plugin's front-end assets (like JavaScript and CSS) need to be compiled from their source files.
+
+* **Build for Production:** To compile optimized and minified assets for production use, run:
+
+    ```bash
+    npm run build
+    ```
+
+  This command typically processes your source files (e.g., Vue components, SCSS) and outputs the final, production-ready files into a designated distribution folder (check your `package.json` and build configuration for the exact output location, often `dist/` or `build/`).
+
+* **Development Build (Optional but Recommended):** For active development, there is usually a command that compiles assets quickly and may watch for file changes to automatically recompile. This is often `dev` or `watch`. Check your `package.json` for available scripts. For example:
+
+    ```bash
+    # Example development command (may vary based on setup)
+    npm run dev
+    # Or
+    npm run watch
+    ```
+
+  Run this command in a separate terminal window while you are developing.
+
+After running `npm run build` (or the equivalent development command), the necessary front-end files will be ready for the plugin to load.
 
 ## External Services
 

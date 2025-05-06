@@ -12,62 +12,48 @@ class Pathwise_Badge_Connect_Scripts {
 
 		// Enqueue assets specifically for the admin area
 		if (is_admin()) {
-
 			$current_screen = get_current_screen();
-
 			// Check if we're on the specific admin page for the plugin
 			if (isset($current_screen->base) && $current_screen->base === 'toplevel_page_pathwise-badge-connect') {
-				$js_files = glob($build_dir . 'assets/main*.js');
-
-				$count = 1;
-				foreach ($js_files as $js_file) {
-					$js_file_url = $build_url . 'assets/' . basename($js_file);
-					wp_enqueue_script('pbc-vue-main-js-' . $count, $js_file_url, [
-						'wp-blocks',
-						'wp-i18n',
-						'wp-element',
-						'wp-block-editor',
-						'wp-components',
-						'wp-api-fetch'
-					], filemtime($js_file), true); // Use file modification time for versioning
-					$count++;
-				}
+				$js_file = $build_dir . 'assets/main.js';
+				$js_file_url = $build_url . 'assets/' . basename($js_file);
+				// *** ADD 'jquery' as a dependency here ***
+				wp_enqueue_script('pbc-vue-main-js', $js_file_url, ['jquery'], filemtime($js_file), true); // Use file modification time for versioning
 			} else {
-				$js_files = glob($build_dir . 'assets/badges-block*.js');
-
-				$count = 1;
-				foreach ($js_files as $js_file) {
-					$js_file_url = $build_url . 'assets/' . basename($js_file);
-					wp_enqueue_script('pbc-vue-badge-blocks-js-' . $count, $js_file_url, [
-						'wp-blocks',
-						'wp-i18n',
-						'wp-element',
-						'wp-block-editor',
-						'wp-components',
-						'wp-api-fetch'
-					], filemtime($js_file), true); // Use file modification time for versioning
-					$count++;
-				}
+				$js_file = $build_dir . 'assets/badges-block.js';
+				$js_file_url = $build_url . 'assets/' . basename($js_file);
+				// Keep block editor dependencies for block context
+				wp_enqueue_script('pbc-vue-badge-blocks-js', $js_file_url, [
+					'wp-blocks',
+					'wp-i18n',
+					'wp-element',
+					'wp-block-editor',
+					'wp-components',
+					'wp-api-fetch',
+					'jquery' // Add jquery dependency here too, just in case needed in editor context
+				], filemtime($js_file), true); // Use file modification time for versioning
 			}
 		}
 
 		$api_key = $this->pathwise_badge_connect_local_api_key();
 
-		if ( wp_script_is( 'pbc-vue-main-js-1', 'enqueued' ) ) {
-			wp_localize_script( 'pbc-vue-main-js-1', 'pbcOptions', [
+		if ( wp_script_is( 'pbc-vue-main-js', 'enqueued' ) ) {
+			wp_localize_script( 'pbc-vue-main-js', 'pbcOptions', [
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
 				'pbcApiKey' => $api_key
 			] );
 		}
 
-		if ( wp_script_is( 'pbc-vue-badge-blocks-js-1', 'enqueued' ) ) {
-			wp_localize_script( 'pbc-vue-badge-blocks-js-1', 'pbcOptions', [
+		// Also update localize for the block script if it needs jQuery
+		if ( wp_script_is( 'pbc-vue-badge-blocks-js', 'enqueued' ) ) {
+			wp_localize_script( 'pbc-vue-badge-blocks-js', 'pbcOptions', [
 				'ajaxurl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
 				'pbc-api-key' => $api_key
 			] );
 		}
+
 
 		$css_files = glob($build_dir . 'assets/*.css');
 

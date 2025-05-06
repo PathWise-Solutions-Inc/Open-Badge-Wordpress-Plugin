@@ -10,11 +10,6 @@ lerna-debug.log*
 node_modules
 *.local
 
-# Ignore all build directories
-build/
-# But do not ignore build under dist/pathwise-badge-connect
-!/dist/pathwise-badge-connect/build/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
