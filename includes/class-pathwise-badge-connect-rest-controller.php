@@ -13,20 +13,39 @@ class Pathwise_Badge_Connect_REST_Controller {
 	public function register_routes(): void {
 
 		register_rest_route('pathwise-badge-connect/v1', '/connection-status', [
-			'methods' => 'GET',
+			'methods'  => 'GET',
 			'callback' => [$this, 'get_connection_status'],
 			'permission_callback' => [$this, 'check_permissions'],
+			'args' => [
+				'provider' => [
+					'type' => 'string',
+					'default' => 'obf',
+					'enum' => ['obf', 'cancred'],
+				],
+			],
 		]);
 
-		register_rest_route('pathwise-badge-connect/v1', '/settings', [
+		register_rest_route('pathwise-badge-connect/v1', '/settings/obf', [
 			'methods' => 'GET',
-			'callback' => [$this, 'get_settings'],
+			'callback' => [$this, 'get_settings_obf'],
 			'permission_callback' => [$this, 'check_permissions'],
 		]);
 
-		register_rest_route('pathwise-badge-connect/v1', '/settings', [
+		register_rest_route('pathwise-badge-connect/v1', '/settings/cancred', [
+			'methods' => 'GET',
+			'callback' => [$this, 'get_settings_cancred'],
+			'permission_callback' => [$this, 'check_permissions'],
+		]);
+
+		register_rest_route('pathwise-badge-connect/v1', '/settings/obf', [
 			'methods' => 'POST',
-			'callback' => [$this, 'save_settings'],
+			'callback' => [$this, 'save_settings_obf'],
+			'permission_callback' => [$this, 'check_permissions'],
+		]);
+
+		register_rest_route('pathwise-badge-connect/v1', '/settings/cancred', [
+			'methods' => 'POST',
+			'callback' => [$this, 'save_settings_cancred'],
 			'permission_callback' => [$this, 'check_permissions'],
 		]);
 
@@ -148,65 +167,111 @@ class Pathwise_Badge_Connect_REST_Controller {
 	}
 
 	/**
-	* Get the connection status with the PBC API.
+	* Get the connection status with the Pathwise Badge Connect API.
 	*
 	* @param WP_REST_Request $request
 	* @return WP_REST_Response
 	*/
 	public function get_connection_status(WP_REST_Request $request): WP_REST_Response {
-		$client_id = get_option('pathwise_badge_connect_client_id');
-		$client_secret = get_option('pathwise_badge_connect_client_secret');
+		$provider = $request->get_param('provider') ?? 'obf';
+
+		if ($provider === 'cancred') {
+			$client_id = get_option('pathwise_badge_connect_cancred_client_id');
+			$client_secret = get_option('pathwise_badge_connect_cancred_client_secret');
+		} else {
+			$client_id = get_option('pathwise_badge_connect_obf_client_id');
+			$client_secret = get_option('pathwise_badge_connect_obf_client_secret');
+		}
 
 		if (empty($client_id) || empty($client_secret)) {
-			error_log('PBC Client ID or Secret is missing.');
+			error_log("PBC {$provider} Client ID or Secret is missing.");
 			return new WP_REST_Response(['connection_status' => 'Not Connected'], 200);
 		}
 
-		$api_client = new Pathwise_Badge_Connect_API_Client($client_id, $client_secret);
+		$api_client = new Pathwise_Badge_Connect_API_Client($client_id, $client_secret, $provider);
 		$status = $api_client->get_connection_status();
 
-		if ($status === 'PBC Error') {
-			error_log('PBC API Connection Error');
+		if ($status === 'OpenBadge Error') {
+			error_log("PBC API Connection Error for {$provider}");
 		}
 
 		return new WP_REST_Response(['connection_status' => $status], 200);
 	}
 
+
 	/**
-	 * Sync badges with the PBC API.
+	 * Sync badges with the PBC API for both OBF and CanCred connections if configured.
 	 *
 	 * @param WP_REST_Request $request
+	 *
 	 * @return WP_REST_Response
+	 * @throws Exception
 	 */
 	public function sync_badges(WP_REST_Request $request): WP_REST_Response {
-		$api_client = new Pathwise_Badge_Connect_API_Client(get_option('pathwise_badge_connect_client_id'), get_option('pathwise_badge_connect_client_secret'));
+		$obf_client_id = get_option('pathwise_badge_connect_obf_client_id');
+		$obf_secret = get_option('pathwise_badge_connect_obf_client_secret');
+		$cancred_client_id = get_option('pathwise_badge_connect_cancred_client_id');
+		$cancred_secret = get_option('pathwise_badge_connect_cancred_client_secret');
 
-		// Fetch badges from the PBC API
-		$badges = $api_client->get_badges([
-			'draft' => 0,
-			'external' => 1,
-		]);
+		$all_synced_badges = [];
 
-		if (is_wp_error($badges)) {
-			Pathwise_Badge_Connect_Log::log_error( 'Failed to synchronize badges from Open Badge Factory: ' . $badges->get_error_message());
-			return new WP_REST_Response(['message' => $badges->get_error_message()], 500);
-		}
-
-		try {
+		// Helper function to sync badges from a client and handle errors/logging
+		$sync_from_client = function($client_id, $secret, $type) {
 			$badge_model = new Pathwise_Badge_Connect_Badge();
-			$synced_badges = $badge_model->sync_from_api($badges);
+			$client      = new Pathwise_Badge_Connect_API_Client($client_id, $secret, $type);
+			$badges      = $client->get_badges([
+				'draft' => 0,
+				'external' => 1,
+			]);
 
-			$last_sync_time = gmdate('Y-m-d H:i:s');
-			update_option('pathwise_badge_connect_last_sync', $last_sync_time);
+			if (is_wp_error($badges)) {
+				Pathwise_Badge_Connect_Log::log_error("Failed to synchronize badges from {$type}: " . $badges->get_error_message());
+				return new WP_Error('sync_error', "Failed to synchronize badges from {$type}: " . $badges->get_error_message());
+			}
 
-			Pathwise_Badge_Connect_Log::log_success( "Badges successfully synchronized from Open Badge Factory. Total badges synchronized: " . count($synced_badges));
+			try {
+				$synced = $badge_model->sync_from_api($badges, $client_id);
+				Pathwise_Badge_Connect_Log::log_success("Badges successfully synchronized from {$type}. Total badges synchronized: " . count($synced));
+				return $synced;
+			} catch (Exception $e) {
+				Pathwise_Badge_Connect_Log::log_error("Error during badge synchronization from {$type}: " . $e->getMessage());
+				return new WP_Error('sync_exception', "Error during badge synchronization from {$type}: " . $e->getMessage());
+			}
+		};
 
-			return new WP_REST_Response(['success' => true, 'last_sync' => $last_sync_time, 'badges' => $synced_badges], 200);
-		} catch (Exception $e) {
-			Pathwise_Badge_Connect_Log::log_error( 'Error during badge synchronization: ' . $e->getMessage());
-			return new WP_REST_Response(['message' => 'Error during badge synchronization: ' . $e->getMessage()], 500);
+		// Sync from Open Badge Factory if configured
+		if (!empty($obf_client_id) && !empty($obf_secret)) {
+			$result = $sync_from_client($obf_client_id, $obf_secret, 'obf');
+			if (is_wp_error($result)) {
+				return new WP_REST_Response(['message' => $result->get_error_message()], 500);
+			}
+			$all_synced_badges = array_merge($all_synced_badges, $result);
 		}
+
+		// Sync from CanCred if configured
+		if (!empty($cancred_client_id) && !empty($cancred_secret)) {
+			$result = $sync_from_client($cancred_client_id, $cancred_secret, 'cancred');
+			if (is_wp_error($result)) {
+				return new WP_REST_Response(['message' => $result->get_error_message()], 500);
+			}
+			$all_synced_badges = array_merge($all_synced_badges, $result);
+		}
+
+		if (empty($all_synced_badges)) {
+			return new WP_REST_Response(['message' => 'No badges synchronized. Please check your connection settings.'], 400);
+		}
+
+		// Update last sync time
+		$last_sync_time = gmdate('Y-m-d H:i:s');
+		update_option('pathwise_badge_connect_last_sync', $last_sync_time);
+
+		return new WP_REST_Response([
+			'success' => true,
+			'last_sync' => $last_sync_time,
+			'badges' => $all_synced_badges,
+		], 200);
 	}
+
 
 	/**
 	 * Get the last sync time.
@@ -366,10 +431,25 @@ class Pathwise_Badge_Connect_REST_Controller {
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response
 	 */
-	public function get_settings(WP_REST_Request $request): WP_REST_Response {
+	public function get_settings_obf(WP_REST_Request $request): WP_REST_Response {
 		$settings = [
-			'client_id' => get_option('pathwise_badge_connect_client_id'),
-			'client_secret' => get_option('pathwise_badge_connect_client_secret'),
+			'client_id' => get_option('pathwise_badge_connect_obf_client_id'),
+			'client_secret' => get_option('pathwise_badge_connect_obf_client_secret'),
+		];
+
+		return new WP_REST_Response(['settings' => $settings], 200);
+	}
+
+	/**
+	 * Get settings.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function get_settings_cancred(WP_REST_Request $request): WP_REST_Response {
+		$settings = [
+			'client_id' => get_option('pathwise_badge_connect_cancred_client_id'),
+			'client_secret' => get_option('pathwise_badge_connect_cancred_client_secret'),
 		];
 
 		return new WP_REST_Response(['settings' => $settings], 200);
@@ -381,13 +461,34 @@ class Pathwise_Badge_Connect_REST_Controller {
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response
 	 */
-	public function save_settings(WP_REST_Request $request): WP_REST_Response {
+	public function save_settings_obf(WP_REST_Request $request): WP_REST_Response {
 		$params = $request->get_json_params();
 		$client_id = sanitize_text_field($params['client_id']);
 		$client_secret = sanitize_text_field($params['client_secret']);
 
-		update_option('pathwise_badge_connect_client_id', $client_id);
-		update_option('pathwise_badge_connect_client_secret', $client_secret);
+		update_option('pathwise_badge_connect_obf_client_id', $client_id);
+		update_option('pathwise_badge_connect_obf_client_secret', $client_secret);
+
+		// Invalidate old token if credentials change
+		delete_option('pathwise_badge_connect_access_token');
+		delete_option('pathwise_badge_connect_token_expires_in');
+
+		return new WP_REST_Response(['success' => true], 200);
+	}
+
+	/**
+	 * Save settings.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function save_settings_cancred(WP_REST_Request $request): WP_REST_Response {
+		$params = $request->get_json_params();
+		$client_id = sanitize_text_field($params['client_id']);
+		$client_secret = sanitize_text_field($params['client_secret']);
+
+		update_option('pathwise_badge_connect_cancred_client_id', $client_id);
+		update_option('pathwise_badge_connect_cancred_client_secret', $client_secret);
 
 		// Invalidate old token if credentials change
 		delete_option('pathwise_badge_connect_access_token');
@@ -483,7 +584,7 @@ class Pathwise_Badge_Connect_REST_Controller {
 			return new WP_REST_Response(['error' => __('User is not logged in', 'pathwise-badge-connect')], 401);
 		}
 
-		$user_badges = new PBC_User_Badges();
+		$user_badges = new Pathwise_Badge_Connect_User_Badges();
 		$badges = $user_badges->get_badges_by_user($user_id);
 
 		if (is_wp_error($badges)) {

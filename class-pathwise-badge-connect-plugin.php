@@ -33,7 +33,7 @@ class Pathwise_Badge_Connect_Plugin {
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 		add_action( 'admin_init', [ $this, 'check_admin_notices' ] );
-		add_action( 'init', [ $this, 'register_pbc_block' ] );
+		add_action( 'init', [ $this, 'register_pathwise_badge_connect_block' ] );
 	}
 
 	private function define_shortcodes(): void {
@@ -58,28 +58,39 @@ class Pathwise_Badge_Connect_Plugin {
 	public function check_admin_notices(): void {
 		$notice_handler = new Pathwise_Badge_Connect_Notice_Handler();
 
-		$client_id         = get_option( 'pathwise_badge_connect_client_id' );
-		$client_secret     = get_option( 'pathwise_badge_connect_client_secret' );
-		$api_client        = new Pathwise_Badge_Connect_API_Client( $client_id, $client_secret );
-		$connection_status = $api_client->get_connection_status();
+		$obf_client_id         = get_option( 'pathwise_badge_connect_obf_client_id' );
+		$obf_client_secret     = get_option( 'pathwise_badge_connect_obf_client_secret' );
+		$obf_api_client        = new Pathwise_Badge_Connect_API_Client( $obf_client_id, $obf_client_secret, 'obf' );
+		$obf_connection_status = $obf_api_client->get_connection_status();
+		$cancred_client_id         = get_option( 'pathwise_badge_connect_cancred_client_id' );
+		$cancred_client_secret     = get_option( 'pathwise_badge_connect_cancred_client_secret' );
+		$cancred_api_client        = new Pathwise_Badge_Connect_API_Client( $obf_client_id, $obf_client_secret, 'cancred' );
+		$cancred_connection_status = $cancred_api_client->get_connection_status();
 
 		// Check if Client ID is filled
-		if ( empty( $client_id ) ) {
+		if ( empty( $obf_client_id ) || empty( $cancred_client_id ) ) {
 			$notice_handler->create_or_update_notice( 'client_id_missing', 'error', 'Missing Client ID', 'The Client ID is not filled. Please configure on the settings page.' );
 		} else {
 			$notice_handler->remove_notice( 'client_id_missing' );
 		}
 
 		// Check if Client Secret is filled
-		if ( empty( $client_secret ) ) {
+		if ( empty( $obf_client_secret ) || empty( $cancred_client_secret ) ) {
 			$notice_handler->create_or_update_notice( 'client_secret_missing', 'error', 'Missing Client Secret', 'The Client Secret is not filled. Please configure on the settings page.' );
 		} else {
 			$notice_handler->remove_notice( 'client_secret_missing' );
 		}
 
 		// Check if connection to Open Badge Factory API is working
-		if ( is_wp_error( $connection_status ) ) {
+		if ( is_wp_error( $obf_connection_status ) ) {
 			$notice_handler->create_or_update_notice( 'api_connection_failed', 'error', 'API Connection Failed', 'Could not connect to the Open Badge Factory API. Please check your credentials.' );
+		} else {
+			$notice_handler->remove_notice( 'api_connection_failed' );
+		}
+
+		// Check if connection to Open Badge Factory API is working
+		if ( is_wp_error( $cancred_connection_status ) ) {
+			$notice_handler->create_or_update_notice( 'api_connection_failed', 'error', 'API Connection Failed', 'Could not connect to the CanCred API. Please check your credentials.' );
 		} else {
 			$notice_handler->remove_notice( 'api_connection_failed' );
 		}
@@ -110,7 +121,7 @@ class Pathwise_Badge_Connect_Plugin {
 		}
 	}
 
-	public function register_pbc_block(): void {
+	public function register_pathwise_badge_connect_block(): void {
 		if ( !WP_Block_Type_Registry::get_instance()->is_registered( 'pbc/badges-block' ) ) {
 			register_block_type( 'pbc/badges-block', [
 				'render_callback' => [ $this, 'render_pathwise_badge_connect_badges_block' ],
@@ -292,7 +303,7 @@ class Pathwise_Badge_Connect_Plugin {
 		$table_name_badges = $wpdb->prefix . 'pathwise_badge_connect_badges';
 		$sql_badges = "CREATE TABLE $table_name_badges (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        pathwise_badge_connect_client_id VARCHAR(255) NOT NULL,
+        pbc_client_id VARCHAR(255) NOT NULL,
         pbc_id VARCHAR(255) NOT NULL,
         name VARCHAR(255) NOT NULL,
         description TEXT NOT NULL,
@@ -369,9 +380,11 @@ class Pathwise_Badge_Connect_Plugin {
 
 		// Drop existing foreign key constraints if they exist.
 		// The @ operator suppresses warnings if the constraint isn’t present.
+        /*
 		@$wpdb->query( "ALTER TABLE $table_name_triggers DROP FOREIGN KEY fk_badge_id" );
 		@$wpdb->query( "ALTER TABLE $table_name_user_badges DROP FOREIGN KEY fk_user_id" );
 		@$wpdb->query( "ALTER TABLE $table_name_user_badges DROP FOREIGN KEY fk_badge_id_user_badges" );
+        */
 
 		// Add foreign key constraints.
 		$wpdb->query( "ALTER TABLE $table_name_triggers 

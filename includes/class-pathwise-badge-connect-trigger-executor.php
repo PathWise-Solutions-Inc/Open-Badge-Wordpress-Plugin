@@ -71,8 +71,8 @@ class Pathwise_Badge_Connect_Trigger_Executor {
 		$badge_id = $trigger->badge_id;
 		$email = get_userdata($user_id)->user_email;
 
-		$client_id = get_option('pathwise_badge_connect_client_id');
-		$client_secret = get_option('pathwise_badge_connect_client_secret');
+		$client_id = get_option('pathwise_badge_connect_obf_client_id');
+		$client_secret = get_option('pathwise_badge_connect_obf_client_secret');
 		$api_client = new Pathwise_Badge_Connect_API_Client($client_id, $client_secret);
 
 		$response = $api_client->issue_badge($badge_id, [$email]);

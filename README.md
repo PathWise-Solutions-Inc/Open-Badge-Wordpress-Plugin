@@ -5,22 +5,22 @@
 **Requires at least**: 5.8  
 **Tested up to**: 6.8  
 **Requires PHP**: 7.4  
-**Stable tag**: 0.3.2  
+**Stable tag**: 0.3.3  
 **License**: GPLv2 or later  
 **License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
 ## Description
-Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
+Pathwise Badge Connect integrates WordPress and LearnDash with Open Badge Factory and CanCred Badge Factory, enabling the creation, issuance, and display of Open Badges directly within WordPress. The plugin provides powerful tools for badge synchronization, trigger-based badge issuance, and dynamic user badge displays through Gutenberg blocks or shortcodes.
 
 ## Features Include:
-- **Badge Management**: Sync badges with Open Badge Factory and display them dynamically on your WordPress site.
+- **Badge Sync**: Sync badges with Open Badge Factory and CanCred Factory.
 - **Trigger-Based Issuance**: Link badge issuance to LearnDash course completions, user registration, and other actions.
 - **Gutenberg and Shortcode Support**: Easily display badges using blocks or shortcodes with customizable layouts.
-- **Admin Features**: Activity logging, settings management, and admin notices for seamless control.
+- **Admin Features**: Custom interface for easy badge, trigger and setting management. Additional logging for including.
 
 ## Installation
 
-1. Download the plugin ZIP file (`pathwise-badge-connect-pws.zip`).
+1. Download the plugin ZIP file (`pathwise-badge-connect.zip`).
 2. Log in to your WordPress admin dashboard.
 3. Navigate to **Plugins > Add New > Upload Plugin**.
 4. Select the ZIP file and click **Install Now**.
@@ -101,6 +101,13 @@ This API serivce is provided by Open Badge Factory. For further details on their
 - Privacy Policy: https://openbadgefactory.com/privacy-policy
 
 ## Release Notes
+
+### v0.3.3 - CanCred Integration (2025-05-19)
+
+**What's New:**
+
+- **CanCred Integration:**
+    - You can now integrate badges with OpenBadge Factory and CanCred Factory simultaneously
 
 ### v0.3.0 - Shortcode Integration and Enhanced Badge Display Options (2024-09-19)
 

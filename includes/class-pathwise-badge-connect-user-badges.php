@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 	exit; // Exit if accessed directly
 }
 
-class PBC_User_Badges {
+class Pathwise_Badge_Connect_User_Badges {
 
 	private string $table_name_user_badges;
 	private string $table_name_badges;

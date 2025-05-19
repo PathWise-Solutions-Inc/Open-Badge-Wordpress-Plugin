@@ -1,13 +1,20 @@
 <template>
   <div class="settings-container">
     <div class="section">
-      <h3>Open Badge Factory API</h3>
       <div class="flex-container">
         <div class="flex-item label-item">
-          <label for="status">Connection Status:</label>
+          <label for="status">OpenBadge Connection Status:</label>
         </div>
         <div class="flex-item value-item">
-          <span :class="statusClass">{{ status }}</span>
+          <span :class="obfStatusClass">{{ obfStatus }}</span>
+        </div>
+      </div>
+      <div class="flex-container">
+        <div class="flex-item label-item">
+          <label for="cancredStatus">CanCred Connection Status:</label>
+        </div>
+        <div class="flex-item value-item">
+          <span :class="cancredStatusClass">{{ cancredStatus }}</span>
         </div>
       </div>
       <div class="flex-container">
@@ -29,6 +36,8 @@
       </div>
 
       <hr />
+
+      <h3>Open Badge Factory API</h3>
 
       <div class="flex-container">
         <div class="flex-item label-item">
@@ -89,6 +98,73 @@
           </div>
         </div>
       </div>
+
+      <hr />
+
+      <div class="section">
+        <h3>CanCred Badge Factory API</h3>
+        <div class="flex-container">
+          <div class="flex-item label-item">
+            <label for="clientIdCancred">CanCred API Client ID:</label>
+          </div>
+          <div class="flex-item value-item">
+            <div class="input-group">
+              <input
+                  :type="showClientIdCancred ? 'text' : 'password'"
+                  id="clientIdCancred"
+                  v-model="clientIdCancred"
+                  @input="onInputChange('clientIdCancred')"
+              />
+              <button
+                  v-if="clientIdCancredChanged || saveSuccessClientIdCancred || saveErrorClientIdCancred"
+                  @click="saveOptionCancred('clientIdCancred')"
+                  :class="['save-button', buttonClassCancred('clientIdCancred')]"
+                  :disabled="savingClientIdCancred"
+              >
+                <font-awesome-icon v-if="savingClientIdCancred" icon="spinner" spin />
+                <font-awesome-icon v-else-if="saveSuccessClientIdCancred" icon="thumbs-up" />
+                <font-awesome-icon v-else-if="saveErrorClientIdCancred" icon="times" />
+                <font-awesome-icon v-else icon="check" />
+              </button>
+              <button @click="toggleClientIdVisibilityCancred" class="toggle-visibility pill-blue">
+                <font-awesome-icon :icon="showClientIdCancred ? 'eye-slash' : 'eye'" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-container">
+          <div class="flex-item label-item">
+            <label for="clientSecretCancred">CanCred API Client Secret:</label>
+          </div>
+          <div class="flex-item value-item">
+            <div class="input-group">
+              <input
+                  :type="showClientSecretCancred ? 'text' : 'password'"
+                  id="clientSecretCancred"
+                  v-model="clientSecretCancred"
+                  @input="onInputChange('clientSecretCancred')"
+              />
+              <button
+                  v-if="clientSecretCancredChanged || saveSuccessClientSecretCancred || saveErrorClientSecretCancred"
+                  @click="saveOptionCancred('clientSecretCancred')"
+                  :class="['save-button', buttonClassCancred('clientSecretCancred')]"
+                  :disabled="savingClientSecretCancred"
+              >
+                <font-awesome-icon v-if="savingClientSecretCancred" icon="spinner" spin />
+                <font-awesome-icon v-else-if="saveSuccessClientSecretCancred" icon="thumbs-up" />
+                <font-awesome-icon v-else-if="saveErrorClientSecretCancred" icon="times" />
+                <font-awesome-icon v-else icon="check" />
+              </button>
+              <button @click="toggleClientSecretVisibilityCancred" class="toggle-visibility pill-blue">
+                <font-awesome-icon :icon="showClientSecretCancred ? 'eye-slash' : 'eye'" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
   </div>
 </template>
@@ -112,6 +188,8 @@ export default {
       lastSync: 'Checking...',
       clientId: '',
       clientSecret: '',
+      clientIdCancred: '',
+      clientSecretCancred: '',
       enableLog: false,
       purgeLog: '1_month',
       showClientId: false,
@@ -130,17 +208,34 @@ export default {
       syncButtonText: 'Sync Now',
       syncButtonClass: 'pill-green',
       syncIcon: 'sync',
+      showClientIdCancred: false,
+      showClientSecretCancred: false,
+      clientIdCancredChanged: false,
+      clientSecretCancredChanged: false,
+      savingClientIdCancred: false,
+      savingClientSecretCancred: false,
+      saveSuccessClientIdCancred: false,
+      saveSuccessClientSecretCancred: false,
+      saveErrorClientIdCancred: false,
+      saveErrorClientSecretCancred: false,
+
     };
   },
   computed: {
     badges() {
       return this.$store.getters.getBadges;
     },
-    status() {
-      return this.$store.getters.getConnectionStatus;
+    obfStatus() {
+      return this.$store.getters.getConnectionStatus('obf');
     },
-    statusClass() {
-      return this.$store.getters.getConnectionStatusClass;
+    obfStatusClass() {
+      return this.$store.getters.getConnectionStatusClass('obf');
+    },
+    cancredStatus() {
+      return this.$store.getters.getConnectionStatus('cancred');
+    },
+    cancredStatusClass() {
+      return this.$store.getters.getConnectionStatusClass('cancred');
     },
   },
   methods: {
@@ -149,8 +244,14 @@ export default {
     toggleClientIdVisibility() {
       this.showClientId = !this.showClientId;
     },
+    toggleClientIdVisibilityCancred() {
+      this.showClientIdCancred = !this.showClientIdCancred;
+    },
     toggleClientSecretVisibility() {
       this.showClientSecret = !this.showClientSecret;
+    },
+    toggleClientSecretVisibilityCancred() {
+      this.showClientSecretCancred = !this.showClientSecretCancred;
     },
     onInputChange(field) {
       if (field === 'clientId') {
@@ -161,6 +262,14 @@ export default {
         this.clientSecretChanged = true;
         this.saveSuccessClientSecret = false;
         this.saveErrorClientSecret = false;
+      } else if (field === 'clientIdCancred') {
+        this.clientIdCancredChanged = true;
+        this.saveSuccessClientIdCancred = false;
+        this.saveErrorClientIdCancred = false;
+      } else if (field === 'clientSecretCancred') {
+        this.clientSecretCancredChanged = true;
+        this.saveSuccessClientSecretCancred = false;
+        this.saveErrorClientSecretCancred = false;
       }
     },
     buttonClass(field) {
@@ -175,29 +284,17 @@ export default {
       }
       return '';
     },
-    async fetchSettings() {
-      try {
-        const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings', {
-          method: 'GET',
-          headers: {
-            'pbc-api-key': pbcOptions.pbcApiKey,
-            'X-WP-Nonce': pbcOptions.nonce,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch settings');
-        }
-
-        const data = await response.json();
-
-        if (data && data.settings) {
-          this.clientId = data.settings.client_id;
-          this.clientSecret = data.settings.client_secret;
-        }
-      } catch (error) {
-        console.error('Error fetching settings:', error);
+    buttonClassCancred(field) {
+      if (field === 'clientIdCancred') {
+        if (this.savingClientIdCancred) return 'pill-blue';
+        if (this.saveSuccessClientIdCancred) return 'pill-green';
+        if (this.saveErrorClientIdCancred) return 'pill-red';
+      } else if (field === 'clientSecretCancred') {
+        if (this.savingClientSecretCancred) return 'pill-blue';
+        if (this.saveSuccessClientSecretCancred) return 'pill-green';
+        if (this.saveErrorClientSecretCancred) return 'pill-red';
       }
+      return '';
     },
     async fetchLastSync() {
       try {
@@ -258,11 +355,48 @@ export default {
         }
       }
     },
+    async saveOptionCancred(field) {
+      try {
+        let optionValue;
+        if (field === 'clientIdCancred') {
+          this.savingClientIdCancred = true;
+          this.saveSuccessClientIdCancred = false;
+          optionValue = this.clientIdCancred;
+        } else if (field === 'clientSecretCancred') {
+          this.savingClientSecretCancred = true;
+          this.saveSuccessClientSecretCancred = false;
+          optionValue = this.clientSecretCancred;
+        }
+
+        await this.saveToWordPressOptionCancred({
+          client_id: this.clientIdCancred,
+          client_secret: this.clientSecretCancred,
+        });
+
+      } catch (error) {
+        console.error(`Failed to save ${field}:`, error);
+        if (field === 'clientId') {
+          this.saveSuccessClientId = true;
+          this.clientIdChanged = false;
+        }
+        if (field === 'clientIdCancred') {
+          this.saveErrorClientIdCancred = true;
+        } else if (field === 'clientSecretCancred') {
+          this.saveErrorClientSecretCancred = true;
+        }
+      } finally {
+        if (field === 'clientIdCancred') {
+          this.savingClientIdCancred = false;
+        } else if (field === 'clientSecretCancred') {
+          this.savingClientSecretCancred = false;
+        }
+      }
+    },
     async reloadConnectionStatus() {
       await this.$store.dispatch('fetchConnectionStatus');
     },
     async saveToWordPressOption(options) {
-      const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings', {
+      const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings/obf', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -278,6 +412,26 @@ export default {
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.message || 'Failed to save settings');
+      }
+    },
+    async saveToWordPressOptionCancred(options) {
+      const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings/cancred', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'pbc-api-key': pbcOptions.pbcApiKey,
+          'X-WP-Nonce': pbcOptions.nonce,
+        },
+        body: JSON.stringify(options),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to save CanCred settings');
       }
     },
     async syncNow() {
@@ -333,10 +487,19 @@ export default {
     }
   },
   async mounted() {
-    await this.fetchSettings();
     await this.fetchLastSync();
-    await this.reloadConnectionStatus();
-  }
+    await this.$store.dispatch('fetchSettings'); // OBF
+    await this.$store.dispatch('fetchConnectionStatus'); // OBF
+    await this.$store.dispatch('fetchCancredSettings');
+    await this.$store.dispatch('fetchCancredConnectionStatus');
+
+    const obf = this.$store.getters.getObfSettings;
+    this.clientId = obf.clientId;
+    this.clientSecret = obf.clientSecret;
+    const cancred = this.$store.getters.getCancredSettings;
+    this.clientIdCancred = cancred.clientId;
+    this.clientSecretCancred = cancred.clientSecret;
+  },
 };
 </script>
 

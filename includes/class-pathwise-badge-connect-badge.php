@@ -23,21 +23,25 @@ class Pathwise_Badge_Connect_Badge {
 	}
 
 	/**
+	 * @param $external_badges
+	 * @param $client_id
+	 *
+	 * @return array|object|stdClass[]|null
 	 * @throws Exception
 	 */
-	public function sync_from_api($external_badges) {
+	public function sync_from_api($external_badges, $client_id) {
 		global $wpdb;
 
 		// Step 1: Retrieve all existing badges in the database
 		$existing_badges = $wpdb->get_results("
-			SELECT id, pbc_id, pathwise_badge_connect_client_id, modified_time
+			SELECT id, pbc_id, pbc_client_id, modified_time
 			FROM {$this->table_name}
 		");
 
-		// Create an associative array of existing badges with the combination of pbc_id and pathwise_badge_connect_client_id as the key
+		// Create an associative array of existing badges with the combination of pbc_id and pbc_client_id as the key
 		$existing_badge_map = [];
 		foreach ($existing_badges as $badge) {
-			$key = $badge->pbc_id . '_' . $badge->pathwise_badge_connect_client_id;
+			$key = $badge->pbc_id . '_' . $badge->pbc_client_id;
 			$existing_badge_map[$key] = $badge;
 		}
 
@@ -47,7 +51,7 @@ class Pathwise_Badge_Connect_Badge {
 			$key = $badge['id'] . '_' . $badge['client_id'];
 
 			$data = [
-				'pathwise_badge_connect_client_id' => $badge['client_id'],
+				'pbc_client_id' => $badge['client_id'],
 				'pbc_id' => $badge['id'],
 				'name' => $badge['name'],
 				'description' => $badge['description'],
@@ -85,7 +89,7 @@ class Pathwise_Badge_Connect_Badge {
 
 		// Step 3: Remove badges that are no longer present in the external source
 		foreach ($existing_badge_map as $key => $badge) {
-			if (!isset($new_badge_map[$key])) {
+			if ($badge->pbc_client_id === $client_id && !isset($new_badge_map[$key])) {
 				// Delete associated triggers first
 				$trigger_table_name = $wpdb->prefix . 'pathwise_badge_connect_triggers';
 				$wpdb->delete($trigger_table_name, ['badge_id' => $badge->id]);

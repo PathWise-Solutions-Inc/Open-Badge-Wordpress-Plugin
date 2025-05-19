@@ -5,8 +5,24 @@ export default createStore({
         badges: [],
         triggers: [],
         notices: [],
-        connectionStatus: 'Connecting...',
-        connectionStatusClass: 'pill pill-yellow'
+        connectionStatuses: {
+            obf: {
+                status: 'Connecting...',
+                class: 'pill pill-yellow'
+            },
+            cancred: {
+                status: 'Connecting...',
+                class: 'pill pill-yellow'
+            }
+        },
+        obfSettings: {
+            clientId: '',
+            clientSecret: ''
+        },
+        cancredSettings: {
+            clientId: '',
+            clientSecret: ''
+        }
     },
     mutations: {
         setBadges(state, badges) {
@@ -15,7 +31,7 @@ export default createStore({
         setTriggers(state, triggers) {
             state.triggers = triggers.map(trigger => ({
                 ...trigger,
-                object_title: trigger.object_title || '', // Ensure object_title is properly set
+                object_title: trigger.object_title || '',
             }));
         },
         addTrigger(state, trigger) {
@@ -24,7 +40,7 @@ export default createStore({
         updateTrigger(state, updatedTrigger) {
             const index = state.triggers.findIndex(trigger => trigger.id === updatedTrigger.id);
             if (index !== -1) {
-                state.triggers.splice(index, 1, updatedTrigger); // Update the existing trigger in the list
+                state.triggers.splice(index, 1, updatedTrigger);
             }
         },
         deleteTrigger(state, triggerId) {
@@ -38,26 +54,26 @@ export default createStore({
                 notice.id === noticeId ? { ...notice, status: false } : notice
             );
         },
-        setConnectionStatus(state, status) {
-            state.connectionStatus = status;
-            // Set class based on status
-            switch (status) {
-                case 'Connecting...':
-                    state.connectionStatusClass = 'pill pill-yellow';
-                    break;
-                case 'Connected':
-                    state.connectionStatusClass = 'pill pill-green';
-                    break;
-                case 'Credential Error':
-                case 'Not Connected':
-                case 'Error Checking Status':
-                case 'PBC Error':
-                    state.connectionStatusClass = 'pill pill-red';
-                    break;
-                default:
-                    state.connectionStatusClass = 'pill pill-unknown';
-                    break;
+        setConnectionStatus(state, { provider, status }) {
+            const statusClass = {
+                'Connecting...': 'pill pill-yellow',
+                'Connected': 'pill pill-green',
+                'Credential Error': 'pill pill-red',
+                'Not Connected': 'pill pill-red',
+                'Error Checking Status': 'pill pill-red',
+                'PBC Error': 'pill pill-red',
+            }[status] || 'pill pill-unknown';
+
+            if (state.connectionStatuses[provider]) {
+                state.connectionStatuses[provider].status = status;
+                state.connectionStatuses[provider].class = statusClass;
             }
+        },
+        setObfSettings(state, settings) {
+            state.obfSettings = { ...settings };
+        },
+        setCancredSettings(state, settings) {
+            state.cancredSettings = { ...settings };
         }
     },
     actions: {
@@ -220,7 +236,7 @@ export default createStore({
         },
         async fetchConnectionStatus({ commit }) {
             try {
-                const response = await fetch('/wp-json/pathwise-badge-connect/v1/connection-status', {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/connection-status?provider=obf', {
                     method: 'GET',
                     headers: {
                         'pbc-api-key': pbcOptions.pbcApiKey,
@@ -228,24 +244,88 @@ export default createStore({
                     },
                 });
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch connection status');
-                }
+                if (!response.ok) throw new Error('Failed to fetch OBF connection status');
 
                 const data = await response.json();
-                const status = data.connection_status || 'Error checking status';
-                commit('setConnectionStatus', status); // Commit the status to Vuex
+                commit('setConnectionStatus', { provider: 'obf', status: data.connection_status });
             } catch (error) {
-                console.error('Error fetching connection status:', error);
-                commit('setConnectionStatus', 'Error checking status'); // Update on error
+                console.error('Error fetching OBF connection status:', error);
+                commit('setConnectionStatus', { provider: 'obf', status: 'Error Checking Status' });
             }
         },
+        async fetchCancredConnectionStatus({ commit }) {
+            try {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/connection-status?provider=cancred', {
+                    method: 'GET',
+                    headers: {
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch CanCred connection status');
+
+                const data = await response.json();
+                commit('setConnectionStatus', { provider: 'cancred', status: data.connection_status });
+            } catch (error) {
+                console.error('Error fetching CanCred connection status:', error);
+                commit('setConnectionStatus', { provider: 'cancred', status: 'Error Checking Status' });
+            }
+        },
+        async fetchSettings({ commit }) {
+            try {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings/obf', {
+                    method: 'GET',
+                    headers: {
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch OBF settings');
+
+                const data = await response.json();
+                if (data && data.settings) {
+                    commit('setObfSettings', {
+                        clientId: data.settings.client_id,
+                        clientSecret: data.settings.client_secret
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching OBF settings:', error);
+            }
+        },
+        async fetchCancredSettings({ commit }) {
+            try {
+                const response = await fetch('/wp-json/pathwise-badge-connect/v1/settings/cancred', {
+                    method: 'GET',
+                    headers: {
+                        'pbc-api-key': pbcOptions.pbcApiKey,
+                        'X-WP-Nonce': pbcOptions.nonce,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch CanCred settings');
+
+                const data = await response.json();
+                if (data && data.settings) {
+                    commit('setCancredSettings', {
+                        clientId: data.settings.client_id,
+                        clientSecret: data.settings.client_secret
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching CanCred settings:', error);
+            }
+        }
     },
     getters: {
         getBadges: (state) => state.badges,
         getTriggers: (state) => state.triggers,
         getNotices: (state) => state.notices,
-        getConnectionStatus: (state) => state.connectionStatus,
-        getConnectionStatusClass: (state) => state.connectionStatusClass,
-    },
+        getConnectionStatus: (state) => (provider) => state.connectionStatuses[provider]?.status || '',
+        getConnectionStatusClass: (state) => (provider) => state.connectionStatuses[provider]?.class || '',
+        getObfSettings: (state) => state.obfSettings,
+        getCancredSettings: (state) => state.cancredSettings
+    }
 });

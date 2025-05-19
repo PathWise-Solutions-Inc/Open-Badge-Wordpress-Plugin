@@ -6,7 +6,9 @@ class Pathwise_Badge_Connect_API_Client {
 	private string $client_id;
 	private string $client_secret;
 	private string $token_endpoint = 'https://openbadgefactory.com/v1/client/oauth2/token';
+	private string $token_endpoint_cancred = 'https://factory.cancred.ca/v1/client/oauth2/token';
 	private string $api_base_url = 'https://openbadgefactory.com/v1/';
+	private string $api_base_url_cancred = 'https://factory.cancred.ca/v1/';
 	private string $access_token;
 	private int $token_expires_in;
 
@@ -15,16 +17,24 @@ class Pathwise_Badge_Connect_API_Client {
 	 *
 	 * @param string $client_id
 	 * @param string $client_secret
+	 * @param string $connection
 	 */
-	public function __construct(string $client_id, string $client_secret) {
+	public function __construct(string $client_id, string $client_secret, string $connection = 'obf') {
 		$this->client_id = $client_id;
 		$this->client_secret = $client_secret;
+
+		if ($connection === 'cancred') {
+			$this->token_endpoint = $this->token_endpoint_cancred;
+			$this->api_base_url = $this->api_base_url_cancred;
+		}
+
 		$this->get_access_token();
 	}
 
-	public function get_access_token() {
-		$stored_token = get_option('pathwise_badge_connect_access_token');
-		$token_expires_in = get_option('pathwise_badge_connect_token_expires_in');
+
+	public function get_access_token(string $connection = 'obf') {
+		$stored_token = get_option('pathwise_badge_connect_' . $connection . '_access_token');
+		$token_expires_in = get_option('pathwise_badge_connect_' . $connection . '_token_expires_in');
 		$current_time = time();
 
 		// Return existing token if valid
@@ -45,7 +55,7 @@ class Pathwise_Badge_Connect_API_Client {
 
 		// Log error if response is an error
 		if (is_wp_error($response)) {
-			error_log('PBC API Token Request Error: ' . $response->get_error_message());
+			error_log('Pathwise Badge Connect API Token Request Error: ' . $response->get_error_message());
 			return $response;
 		}
 
@@ -57,8 +67,8 @@ class Pathwise_Badge_Connect_API_Client {
 			$this->access_token = $data['access_token'];
 			$adjusted_expiry_time = $current_time + (int)$data['expires_in'] - 86400;
 			$this->token_expires_in = $adjusted_expiry_time;
-			update_option('pathwise_badge_connect_access_token', $this->access_token);
-			update_option('pathwise_badge_connect_token_expires_in', $this->token_expires_in);
+			update_option('pathwise_badge_connect_' . $connection . '_access_token', $this->access_token);
+			update_option('pathwise_badge_connect_' . $connection . '_token_expires_in', $this->token_expires_in);
 
 			return $this->access_token;
 		}
