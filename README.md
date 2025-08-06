@@ -5,7 +5,7 @@
 **Requires at least**: 5.8  
 **Tested up to**: 6.8  
 **Requires PHP**: 7.4  
-**Stable tag**: 0.3.3  
+**Stable tag**: 0.3.4  
 **License**: GPLv2 or later  
 **License URI**: [https://www.gnu.org/licenses/gpl-2.0.html](https://www.gnu.org/licenses/gpl-2.0.html)
 
@@ -101,6 +101,12 @@ This API serivce is provided by Open Badge Factory. For further details on their
 - Privacy Policy: https://openbadgefactory.com/privacy-policy
 
 ## Release Notes
+
+### v0.3.4 - Improved API debugging (2025-08-06)
+
+**What's New:**
+
+- Additional features added for troubleshooting possible connection and plugin issues.
 
 ### v0.3.3 - CanCred Integration (2025-05-19)
 

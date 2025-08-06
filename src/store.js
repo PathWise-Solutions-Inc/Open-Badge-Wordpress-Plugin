@@ -1,5 +1,33 @@
 import { createStore } from "vuex";
 
+async function handleApiError(response, context = '') {
+    let errorText = '';
+    try {
+        errorText = await response.text();
+    } catch (e) {
+        errorText = '(no response body)';
+    }
+
+    const status = response.status;
+    let hint = '';
+
+    if (status === 404) {
+        hint = 'Route not found. Make sure permalinks are not set to "Plain" and the endpoint is registered.';
+    } else if (status === 403) {
+        hint = 'Access denied. Check your API key, nonce, user capabilities, and clear any caching plugins or server cache.';
+    } else if (status === 401) {
+        hint = 'Unauthorized. The nonce may be expired or invalid.';
+    } else if (status === 500) {
+        hint = 'Internal server error. Check your PHP logs for more information.';
+    } else {
+        hint = 'Unexpected error occurred. Check the server response and browser console.';
+    }
+
+    throw new Error(
+        `[${context}] ${status} ${response.statusText} - ${errorText}\nHint: ${hint}`
+    );
+}
+
 export default createStore({
     state: {
         badges: [],
@@ -88,13 +116,13 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch logs');
+                    await handleApiError(response, 'Fetching Logs');
                 }
 
                 const data = await response.json();
                 return data; // Ensure the logs array is returned correctly
             } catch (error) {
-                console.error('An error occurred while fetching logs: ' + error.message);
+                console.error(error.message);
                 return [];
             }
         },
@@ -109,13 +137,13 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch badges');
+                    await handleApiError(response, 'Fetching Badges');
                 }
 
                 const data = await response.json();
                 commit('setBadges', data.badges);
             } catch (error) {
-                console.error('An error occurred while fetching badges: ' + error.message);
+                console.error(error.message);
             }
         },
         async fetchTriggers({ commit }) {
@@ -129,7 +157,7 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch triggers');
+                    await handleApiError(response, 'Fetching Triggers');
                 }
 
                 const data = await response.json();
@@ -142,7 +170,7 @@ export default createStore({
 
                 commit('setTriggers', triggersWithTitles);
             } catch (error) {
-                console.error('An error occurred while fetching triggers: ' + error.message);
+                console.error(error.message);
             }
         },
         async saveTriggerToStore({ commit }, trigger) {
@@ -158,21 +186,20 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to save trigger');
+                    await handleApiError(response, 'Saving Trigger');
                 }
 
                 const data = await response.json();
 
-                // Ensure the trigger returned by the API has the correct ID and object_title
                 if (trigger.id) {
                     commit('updateTrigger', data.trigger);
                 } else {
                     commit('addTrigger', data.trigger);
                 }
 
-                return data; // Return the saved trigger data including object_title
+                return data;
             } catch (error) {
-                console.error('An error occurred while saving the trigger: ' + error.message);
+                console.error(error.message);
             }
         },
         async deleteTrigger({ commit }, triggerId) {
@@ -186,13 +213,13 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to delete trigger');
+                    await handleApiError(response, 'Delete Trigger');
                 }
 
                 // Commit the mutation to remove the trigger from the state
                 commit('deleteTrigger', triggerId);
             } catch (error) {
-                console.error('An error occurred while deleting the trigger: ' + error.message);
+                console.error(error.message);
             }
         },
         async fetchNotices({ commit }) {
@@ -206,13 +233,13 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch notices');
+                    await handleApiError(response, 'Fetching Notices');
                 }
 
                 const data = await response.json();
                 commit('setNotices', data.notices);
             } catch (error) {
-                console.error('An error occurred while fetching notices: ' + error.message);
+                console.error(error.message);
             }
         },
         async dismissNotice({ commit }, noticeId) {
@@ -226,12 +253,12 @@ export default createStore({
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to dismiss notice');
+                    await handleApiError(response, 'Dismiss Notice');
                 }
 
                 commit('dismissNotice', noticeId);
             } catch (error) {
-                console.error('An error occurred while dismissing the notice: ' + error.message);
+                console.error(error.message);
             }
         },
         async fetchConnectionStatus({ commit }) {
@@ -244,12 +271,14 @@ export default createStore({
                     },
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch OBF connection status');
+                if (!response.ok) {
+                    await handleApiError(response, 'Fetching OBF Connection Status');
+                }
 
                 const data = await response.json();
                 commit('setConnectionStatus', { provider: 'obf', status: data.connection_status });
             } catch (error) {
-                console.error('Error fetching OBF connection status:', error);
+                console.error(error.message);
                 commit('setConnectionStatus', { provider: 'obf', status: 'Error Checking Status' });
             }
         },
@@ -263,12 +292,14 @@ export default createStore({
                     },
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch CanCred connection status');
+                if (!response.ok) {
+                    await handleApiError(response, 'Fetching CanCred Connection Status');
+                }
 
                 const data = await response.json();
                 commit('setConnectionStatus', { provider: 'cancred', status: data.connection_status });
             } catch (error) {
-                console.error('Error fetching CanCred connection status:', error);
+                console.error(error.message);
                 commit('setConnectionStatus', { provider: 'cancred', status: 'Error Checking Status' });
             }
         },
@@ -282,7 +313,9 @@ export default createStore({
                     },
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch OBF settings');
+                if (!response.ok) {
+                    await handleApiError(response, 'Fetching OBF Settings');
+                }
 
                 const data = await response.json();
                 if (data && data.settings) {
@@ -292,7 +325,7 @@ export default createStore({
                     });
                 }
             } catch (error) {
-                console.error('Error fetching OBF settings:', error);
+                console.error(error.message);
             }
         },
         async fetchCancredSettings({ commit }) {
@@ -305,7 +338,9 @@ export default createStore({
                     },
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch CanCred settings');
+                if (!response.ok) {
+                    await handleApiError(response, 'Fetching CanCred Settings');
+                }
 
                 const data = await response.json();
                 if (data && data.settings) {
@@ -315,7 +350,7 @@ export default createStore({
                     });
                 }
             } catch (error) {
-                console.error('Error fetching CanCred settings:', error);
+                console.error(error.message);
             }
         }
     },

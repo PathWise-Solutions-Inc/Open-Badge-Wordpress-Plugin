@@ -3,7 +3,7 @@
  * Plugin Name: Pathwise Badge Connect
  * Plugin URI: https://pathwisesolutions.com/pathwise-badge-connect
  * Description: Connect your LearnDash courses to Open Badge Factory or CanCred. Sync your badges and setup different triggers to issue badges to your learners.
- * Version: 0.3.3
+ * Version: 0.3.4
  * Author: Pathwise Solutions Inc
  * Author URI: https://pathwisesolutions.com
  * License: GPL-2.0+
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Define constants
 if ( ! defined( 'PATHWISE_BADGE_CONNECT_PLUGIN_VERSION' ) ) {
-	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_VERSION', '0.3.3' );
+	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_VERSION', '0.3.4' );
 }
 if ( ! defined( 'PATHWISE_BADGE_CONNECT_PLUGIN_DIR' ) ) {
 	define( 'PATHWISE_BADGE_CONNECT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );

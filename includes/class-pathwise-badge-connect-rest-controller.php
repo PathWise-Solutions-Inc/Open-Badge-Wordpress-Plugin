@@ -142,29 +142,36 @@ class Pathwise_Badge_Connect_REST_Controller {
 		]);
 	}
 
+
 	/**
-	 * Check permissions for the API.
-	 *
 	 * @param WP_REST_Request $request
-	 * @return bool
+	 *
+	 * @return true|WP_Error
 	 */
-	public function check_permissions(WP_REST_Request $request): bool {
+	public function check_permissions(WP_REST_Request $request) {
 		$api_key_received = $request->get_header('pbc-api-key');
-		$api_get_local = get_option( 'pathwise_badge_connect_api_key' );
+		$api_get_local = get_option('pathwise_badge_connect_api_key');
 		$nonce = $request->get_header('X-WP-Nonce');
 
 		if ($api_key_received !== $api_get_local) {
-			new WP_Error('rest_forbidden', __('Invalid API key.', 'pathwise-badge-connect'), ['status' => 403]);
-			return false;
+			return new WP_Error(
+				'rest_forbidden',
+				__('Invalid API key.', 'pathwise-badge-connect'),
+				['status' => 403]
+			);
 		}
 
 		if (!wp_verify_nonce($nonce, 'wp_rest')) {
-			new WP_Error('rest_forbidden', __('Invalid nonce.', 'pathwise-badge-connect'), ['status' => 403]);
-			return false;
+			return new WP_Error(
+				'rest_forbidden',
+				__('Invalid nonce.', 'pathwise-badge-connect'),
+				['status' => 403]
+			);
 		}
 
 		return true;
 	}
+
 
 	/**
 	* Get the connection status with the Pathwise Badge Connect API.
@@ -507,10 +514,14 @@ class Pathwise_Badge_Connect_REST_Controller {
 		global $wpdb;
 
 		$notices = $wpdb->get_results("
-		SELECT * FROM {$wpdb->prefix}pathwise_badge_connect_notices
-		WHERE status = 1
-		ORDER BY created_date DESC
-	");
+		    SELECT * FROM {$wpdb->prefix}pathwise_badge_connect_notices
+		    WHERE status = 1
+		    ORDER BY created_date DESC
+		");
+
+		if ($notices === null) {
+			return new WP_REST_Response(['error' => 'Database query failed'], 500);
+		}
 
 		return new WP_REST_Response(['notices' => $notices], 200);
 	}
